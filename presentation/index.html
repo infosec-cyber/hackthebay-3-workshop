@@ -121,7 +121,16 @@
       <span class="dim">What changed. What didn't.</span>
     </div>
   </div>
-  <p class="dim tiny fragment" style="margin-top:30px;">Then: workshop. You break things. I heckle.</p>
+  <div class="cols small" style="margin-top:20px;">
+    <div class="col box">
+      <strong class="accent">Part 5</strong> · Where this is going<br>
+      <span class="dim">The agent loop. Harness everything.</span>
+    </div>
+    <div class="col box">
+      <strong class="accent">Workshop</strong><br>
+      <span class="dim">You break things. I heckle.</span>
+    </div>
+  </div>
 </section>
 
 <!-- ============================================================ -->
@@ -134,31 +143,35 @@
   </section>
 
   <section>
-    <h2>You already do this</h2>
-    <p class="fragment">Ever debugged code that <em>should</em> work?</p>
-    <p class="fragment">Stared at it until you noticed the one assumption that was wrong?</p>
-    <p class="fragment" style="margin-top:40px;">
-      <span class="accent">That's hacking.</span><br>
-      <span class="small dim">Same skill. Different target. Their assumptions instead of yours.</span>
+    <h2>It's anti-QA</h2>
+    <p class="fragment">QA finds where the <em>happy path</em> breaks.</p>
+    <p class="fragment">You find the paths <span class="accent">nobody thought you'd take.</span></p>
+    <p class="fragment small" style="margin-top:40px;">
+      The dev tested "user clicks A, then B, then C".<br>
+      <span class="accent">You click C first.</span> Then send B twice. Then skip A entirely.<br>
+      <span class="dim">Not "does it work" — "what if I do the wrong thing on purpose?"</span>
     </p>
     <aside class="notes">
-      Important reframe for developers in the room. You're not learning a new
-      skill. Debugging is: "the program is doing something I don't expect,
-      find out why." Hacking is: "make the program do something THEY don't
-      expect." Same muscle.
+      QA verifies the spec. We live entirely OFF-spec. Every bug in this talk
+      is someone using the app in a way the developer never imagined a real
+      user would. That's the whole job: be the user nobody designed for.
     </aside>
   </section>
 
   <section>
     <h2>You are not a pentester</h2>
-    <h2 class="fragment">You are a <span class="accent">very confused user</span></h2>
+    <h2 class="fragment">You are <span class="accent">pathologically curious</span></h2>
     <p class="fragment small" style="margin-top:40px;">
-      The app expects you to click "Submit".<br>
-      You click "Submit" and then ask: <em>what did that actually send?</em>
+      Button says "Submit". Fine. But —<br>
+      <em>What just happened on the backend? Which table? Which service?<br>
+      Why did it take 800ms? What's it doing in those 800ms?</em>
     </p>
+    <p class="fragment tiny dim">You want to understand <span class="accent">everything</span>. The bugs are just a side effect.</p>
     <aside class="notes">
-      Methodology comes later. Scanners come later. Step one is just...
-      watching. Using the app with DevTools open. Being nosy.
+      The mindset isn't "attack". It's "I genuinely need to know how this
+      works and it's bothering me that I don't." Every request is a clue about
+      the architecture behind it. Follow the curiosity — the bugs show up on
+      their own.
     </aside>
   </section>
 
@@ -167,7 +180,7 @@
     <ol>
       <li class="fragment">Where does <span class="accent">my input</span> go?</li>
       <li class="fragment">What does the server <span class="accent">trust</span> that it shouldn't?</li>
-      <li class="fragment">What happens if I <span class="accent">lie</span>?</li>
+      <li class="fragment">What happens if I <span class="accent">fake it</span>?</li>
     </ol>
     <p class="fragment tiny dim" style="margin-top:40px;">
       Every OWASP category is one of these three, wearing a costume.
@@ -176,7 +189,7 @@
       I'm going to keep coming back to these. Every bug in this talk answers
       one of them. SQL injection = "where does my input go" (into a query).
       IDOR = "what does it trust" (the ID I sent). Password reset bypass =
-      "what if I lie" (about which account I am).
+      "what if I fake it" (pretend to be a different account).
     </aside>
   </section>
 
@@ -257,7 +270,7 @@ HTTP/1.1 200 OK
   </section>
 
   <section>
-    <h3>Minute 6: Okay so what if I lie</h3>
+    <h3>Minute 6: Okay so what if I fake it</h3>
     <p class="small">Burp → Proxy → Match and Replace → Response body:</p>
     <pre><code class="text" data-trim>
 Match:    "enabled": false
@@ -273,9 +286,9 @@ Replace:  "enabled": true
       That's why you try it.
     </p>
     <aside class="notes">
-      This is Question #3: what if I lie? But notice — I'm not lying to the
-      SERVER yet. I'm lying to my own BROWSER. Low risk. Fast. Just seeing
-      what's behind the curtain.
+      This is Question #3: what if I fake it? But notice — I'm not faking
+      anything to the SERVER yet. I'm faking the response to my own BROWSER.
+      Low risk. Fast. Just seeing what's behind the curtain.
     </aside>
   </section>
 
@@ -344,11 +357,37 @@ restaurant_id, restaurant_name,    period,   amount,    bank_last4
   </section>
 
   <section>
+    <h3><span class="dim">Tangent:</span> that URL is a bug surface too</h3>
+    <pre><code class="text" data-trim>
+https://blob.../PAYOUT-bd78d6....csv?X-Amz-Signature=...
+    </code></pre>
+    <div class="thought fragment small">
+      S3 presigned URL. The signature locks <em>this exact path</em>. But now I know:<br>
+      — the bucket name<br>
+      — the key naming scheme (<code>PAYOUT-{hex}.csv</code>)<br>
+      — that they proxy files through blob storage at all
+    </div>
+    <div class="box small fragment" style="margin-top:20px;">
+      <strong class="accent">Goes on the list:</strong>
+      does the signature cover the query string? Can I <code>../</code> in the key?
+      Is the bucket itself listable? Are old exports ever deleted?
+      <br><span class="dim tiny">Didn't chase it — already had a crit. But it's written down.</span>
+    </div>
+    <aside class="notes">
+      This is the curiosity thing in action. I got my bug — I could stop. But
+      that URL is LEAKING architecture. Presigned URLs are their own whole
+      category: signature scope bugs, path traversal in the key, bucket
+      misconfig. I don't dig now — I write one line and move on. 15-minute
+      rule. It'll still be weird next week.
+    </aside>
+  </section>
+
+  <section>
     <h3>The whole thing, compressed</h3>
     <div class="timeline">
       <span class="t">00:00</span> Open app. DevTools. Click around.<br>
       <span class="t">05:00</span> Notice feature-flag response. <span class="accent">Q2: what does it trust?</span><br>
-      <span class="t">06:00</span> Flip all flags to true in my browser. <span class="accent">Q3: what if I lie?</span><br>
+      <span class="t">06:00</span> Flip all flags to true in my browser. <span class="accent">Q3: what if I fake it?</span><br>
       <span class="t">07:00</span> New "Export" button appears. Cursed word.<br>
       <span class="t">08:00</span> Click it. API is live. Get a CSV URL.<br>
       <span class="t">09:00</span> Open CSV. It's everyone's payout data.<br>
@@ -419,7 +458,7 @@ POST /forgottenpasswordtokens
   </section>
 
   <section>
-    <h3><span class="dim">Bug 2</span> · What if I lie</h3>
+    <h3><span class="dim">Bug 2</span> · What if I fake it</h3>
     <pre><code class="http" data-trim data-line-numbers="3-4|6">
 POST /forgottenpasswordtokens
 { "otpVerify": { "target": "555-0001", "passphrase": "090038" },
@@ -435,7 +474,7 @@ POST /forgottenpasswordtokens
     <aside class="notes">
       Same three questions. Q1: where does my input go? Into TWO places.
       Q2: what does it trust? It trusts both fields to match. Q3: what if
-      I lie? I make them NOT match.
+      I fake it? I make them NOT match.
       The tell was the duplication. Duplication = two code paths. Two code
       paths = one of them is wrong.
     </aside>
@@ -520,7 +559,7 @@ window.addEventListener('message', (e) => {
   <section>
     <h3>It's the same bug</h3>
     <table class="small">
-      <tr><th></th><th>Q2: What does it trust?</th><th>Q3: The lie</th></tr>
+      <tr><th></th><th>Q2: What does it trust?</th><th>Q3: The fake</th></tr>
       <tr><td><strong class="accent">Export</strong></td><td>Frontend hides the button</td><td>Flip the flags</td></tr>
       <tr><td><strong class="accent">Password reset</strong></td><td>Two fields match</td><td>Make them not match</td></tr>
       <tr><td><strong class="accent">File proxy</strong></td><td>GUIDs are always valid</td><td>Send a bad one</td></tr>
@@ -531,9 +570,9 @@ window.addEventListener('message', (e) => {
     </p>
     <aside class="notes">
       This is the whole talk on one slide. You don't need 100 techniques.
-      You need to ask "what does it trust" and "what if I lie" over and over
-      until something falls over. The techniques are just HOW you lie in a
-      specific context. The questions are the job.
+      You need to ask "what does it trust" and "what if I fake it" over and
+      over until something falls over. The techniques are just HOW you fake
+      things in a specific context. The questions are the job.
     </aside>
   </section>
 </section>
@@ -678,7 +717,7 @@ AI:   "Potential issues I noticed:
     <table class="small">
       <tr><th class="accent">Still your job</th><th class="accent2">Outsource to AI</th></tr>
       <tr><td>Noticing the weird thing</td><td>Explaining what minified code does</td></tr>
-      <tr><td>Asking "what if I lie here?"</td><td>Listing 20 WAYS to lie</td></tr>
+      <tr><td>Asking "what if I fake it here?"</td><td>Listing 20 WAYS to fake it</td></tr>
       <tr><td>Knowing what's normal for THIS app</td><td>Knowing what's normal for ALL apps</td></tr>
       <tr><td>Deciding what to try next</td><td>Writing the PoC once you know what works</td></tr>
       <tr><td>Reading the response and going "huh"</td><td>Decoding the response format</td></tr>
@@ -718,6 +757,126 @@ AI:   "Potential issues I noticed:
 </section>
 
 <!-- ============================================================ -->
+<!-- PART 5 — WHERE THIS IS GOING                                 -->
+<!-- ============================================================ -->
+<section data-background-color="#1a1a2e">
+  <section>
+    <h1><span class="dim">Part 5</span><br>Where This Is <span class="accent">Going</span></h1>
+    <p class="dim small">
+      Part 4 was "AI as a faster grep."<br>
+      This is the next step: <span class="accent">give it the keys.</span>
+    </p>
+    <aside class="notes">
+      Everything so far was copy-paste into a chat window. That's 2024. The
+      next shape is: the agent sits INSIDE the engagement. Not a search engine
+      — a teammate with root on the target and read access to everything the
+      devs wrote about it.
+    </aside>
+  </section>
+
+  <section>
+    <h3>The bottleneck was never the exploit</h3>
+    <p class="small">
+      The 9-minute bug took 9 minutes.<br>
+      Getting <em>enough context to notice it</em> took the engagement setup.
+    </p>
+    <div class="box small fragment">
+      Remember "AI has zero intuition"? That's because we give it zero
+      <span class="accent">context</span>.<br><br>
+      What if it could read the source, tail the logs, see the traces,
+      read the Jira tickets where they <em>argued about</em> the auth design?<br><br>
+      <span class="accent2">Now it knows what's weird about THIS app.</span>
+    </div>
+    <aside class="notes">
+      The "no intuition" problem is actually a "no context" problem. I have
+      intuition because I've been staring at this target for a week. Give the
+      agent the same week's worth of visibility — compressed into an hour of
+      ingestion — and the gap closes fast.
+    </aside>
+  </section>
+
+  <section>
+    <h3>The loop</h3>
+    <div class="timeline small">
+      <span class="t">1.</span> <strong class="accent">Harness everything.</strong>
+        Source repo, log aggregator, traces, SSH to boxes, Jira, Confluence, Slack.
+        <span class="dim">One interface. Agent can query all of it.</span><br>
+      <span class="t">2.</span> <strong class="accent">Let it learn.</strong>
+        Read the code. Read the tickets. Read the postmortems.
+        Build a test plan from what the <em>devs</em> were worried about.<br>
+      <span class="t">3.</span> <strong class="accent">Run with full observability.</strong>
+        Every request it sends, it also watches the logs + traces for that request.
+        <span class="dim">Sees the backend react in real time.</span><br>
+      <span class="t">4.</span> <strong class="accent">Validate without access.</strong>
+        Strip the harness. Prove the finding works from outside — like a real attacker.<br>
+      <span class="t">5.</span> <strong class="accent">Maximize impact.</strong>
+        Don't stop at "it's a bug." Chain it. What's the <em>worst</em> story you can tell?<br>
+      <span class="t">6.</span> <strong class="accent">Fix it.</strong>
+        Agent has the source. It writes the patch. Devs review.<br>
+      <span class="t">7.</span> <strong class="accent2">Go to 1.</strong>
+        Harness got better. Target changed. Run it again.<br>
+    </div>
+    <aside class="notes">
+      Walk through each step. Step 1 is the investment — build once, reuse
+      forever. Step 3 is the magic: the agent sends a weird request AND
+      watches the stack trace it caused. That's the "huh" moment automated.
+      Step 4 is critical — findings that only work with insider access are
+      worthless. Step 7 is what makes it a LOOP: every pass the harness gets
+      sharper and the target gets harder.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Step 3 is the whole trick</h3>
+    <div class="cols">
+      <div class="col box small">
+        <strong class="dim">Blackbox (today)</strong><br><br>
+        <code>POST /api/export</code><br>
+        → <code>500 Internal Server Error</code><br><br>
+        <span class="dim">"Huh. Something broke. No idea what."</span><br>
+        <span class="tiny dim">Add to the list. Maybe come back.</span>
+      </div>
+      <div class="col box small">
+        <strong class="accent">Harnessed</strong><br><br>
+        <code>POST /api/export</code><br>
+        → <code>500</code> + <span class="accent2">trace shows SQL timeout
+        on unindexed <code>tenant_id</code> join</span><br><br>
+        <span class="accent">"That query has no WHERE clause."</span><br>
+        <span class="tiny dim">That's the bug. Right there.</span>
+      </div>
+    </div>
+    <p class="fragment tiny dim" style="margin-top:30px;">
+      Same request. The difference is <span class="accent">seeing the backend flinch.</span>
+    </p>
+    <aside class="notes">
+      This is the restaurant-SaaS bug again. Blackbox, I had to download the
+      CSV to know it was everyone's data. With traces wired in, the agent
+      sees the query hit the whole payouts table the MOMENT the request lands.
+      The guessing goes away.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Where you fit</h3>
+    <p class="small">
+      Someone still decides <span class="accent">what "impact" means</span> for this business.<br>
+      Someone still reads step 5 and says <span class="accent">"no — chain it with the SSO thing."</span><br>
+      Someone still builds the harness in step 1.
+    </p>
+    <div class="box small fragment" style="margin-top:30px;">
+      The loop doesn't replace the pathologically curious human.<br>
+      <span class="accent2">It gives that human a hundred hands.</span>
+    </div>
+    <aside class="notes">
+      Closing the future section. Don't oversell it — this isn't "AI replaces
+      pentesters." It's "the boring 80% of the engagement becomes ambient."
+      You spend your time on the 20% that actually needs a human to go "huh."
+      That's the good part anyway.
+    </aside>
+  </section>
+</section>
+
+<!-- ============================================================ -->
 <!-- WRAP                                                         -->
 <!-- ============================================================ -->
 <section data-background-color="#0d1b2a">
@@ -725,7 +884,7 @@ AI:   "Potential issues I noticed:
     <h2>The whole talk in one box</h2>
     <div class="box">
       <strong class="accent">1.</strong> Watch the app until you know what normal looks like.<br>
-      <strong class="accent">2.</strong> Ask: where does my input go · what does it trust · what if I lie.<br>
+      <strong class="accent">2.</strong> Ask: where does my input go · what does it trust · what if I fake it.<br>
       <strong class="accent">3.</strong> Try the cheap thing. Under 60 seconds? Just try it.<br>
       <strong class="accent">4.</strong> Weird response → 15 minutes → write it down.<br>
       <strong class="accent">5.</strong> Stuck on the HOW? Ask AI. Stuck on the WHAT? That's you.<br>
