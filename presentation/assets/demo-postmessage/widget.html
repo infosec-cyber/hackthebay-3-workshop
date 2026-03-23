@@ -1,0 +1,10 @@
+<!doctype html>
+<!-- Legitimate iframe — sends benign messages to parent -->
+<script>
+  setInterval(() => {
+    parent.postMessage(
+      { html: '<span style="color:#059669">✓ Support agent is online</span>' },
+      '*'
+    );
+  }, 3000);
+</script>

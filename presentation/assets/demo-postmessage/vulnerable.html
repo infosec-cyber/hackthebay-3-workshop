@@ -1,0 +1,66 @@
+<!doctype html>
+<!--
+  LIVE DEMO TARGET — postMessage origin bypass
+  Run: python3 -m http.server 9000 from workshop root
+  Open: http://localhost:9000/assets/demo-postmessage/vulnerable.html
+-->
+<html>
+<head>
+  <title>AcmeCorp Support Portal</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; max-width: 700px; margin: 40px auto; padding: 20px; }
+    .header { background: #2563eb; color: white; padding: 20px; border-radius: 8px; }
+    .widget { border: 2px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-top: 20px; }
+    #chat-log { min-height: 200px; background: #f9fafb; padding: 16px; border-radius: 4px; }
+    .hint { color: #6b7280; font-size: 12px; margin-top: 20px; }
+    code { background: #f3f4f6; padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>AcmeCorp Support</h1>
+    <p>Logged in as: <strong>admin@acmecorp.com</strong></p>
+  </div>
+
+  <div class="widget">
+    <h3>Live Chat Widget</h3>
+    <div id="chat-log">
+      <em>Waiting for messages from support iframe...</em>
+    </div>
+  </div>
+
+  <iframe src="widget.html" style="display:none" id="chat-frame"></iframe>
+
+  <div class="hint">
+    <strong>Demo notes:</strong><br>
+    1. Open DevTools → Console. Observe the postMessage traffic.<br>
+    2. Sources → this file → find the <code>message</code> listener on line ~50.<br>
+    3. Note the origin check: <code>.includes('acmecorp')</code><br>
+    4. Open <code>attacker.html</code> in another tab → it bypasses the check.<br>
+    5. Watch <code>document.cookie</code> get exfiltrated via the "chat log" innerHTML sink.
+  </div>
+
+  <script>
+    // Simulate a session cookie for the demo
+    document.cookie = "session=admin_token_a8f3e91b2c4d; path=/";
+    document.cookie = "csrf=xK9mP2nQ7vR; path=/";
+
+    // ═══════════════════════════════════════════════════════════════
+    // THE VULNERABLE CODE — this is what you show in Sources tab
+    // ═══════════════════════════════════════════════════════════════
+    window.addEventListener('message', function(event) {
+      // "Security" check — only accept from our domains
+      if (event.origin.includes('acmecorp')) {            // ← BUG: substring match
+        var log = document.getElementById('chat-log');
+        log.innerHTML += '<p>' + event.data.html + '</p>';  // ← SINK: innerHTML
+      } else {
+        console.warn('[blocked]', event.origin);
+      }
+    });
+    // ═══════════════════════════════════════════════════════════════
+
+    // Legitimate traffic so the demo has something to show
+    console.log('[vulnerable.html] Listening for postMessage. Cookie:', document.cookie);
+  </script>
+</body>
+</html>

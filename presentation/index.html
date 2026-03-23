@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Let's Hack From The Beginning — HackTheBay 3.0</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/dist/theme/black.css" id="theme">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/plugin/highlight/monokai.css">
+
+  <style>
+    :root {
+      --r-heading-font: "JetBrains Mono", ui-monospace, monospace;
+      --r-main-font: "Inter", -apple-system, sans-serif;
+      --r-heading-text-transform: none;
+      --accent: #00ff9f;
+      --accent2: #ff0066;
+      --dim: #6b7280;
+    }
+    .reveal h1, .reveal h2, .reveal h3 { letter-spacing: -0.02em; }
+    .reveal .accent { color: var(--accent); }
+    .reveal .accent2 { color: var(--accent2); }
+    .reveal .dim { color: var(--dim); font-size: 0.8em; }
+    .reveal .small { font-size: 0.65em; }
+    .reveal .tiny { font-size: 0.5em; }
+    .reveal pre { width: 100%; box-shadow: 0 8px 32px rgba(0,255,159,0.1); }
+    .reveal pre code { max-height: 520px; padding: 20px; }
+    .reveal section img { border: none; box-shadow: none; }
+    .reveal .tag {
+      display: inline-block; padding: 2px 12px; border-radius: 4px;
+      background: rgba(0,255,159,0.15); border: 1px solid var(--accent);
+      font-size: 0.5em; font-family: var(--r-heading-font);
+      vertical-align: middle; margin-left: 8px;
+    }
+    .reveal .tag.warn { background: rgba(255,0,102,0.15); border-color: var(--accent2); }
+    .reveal .cols { display: flex; gap: 40px; align-items: flex-start; }
+    .reveal .col { flex: 1; }
+    .reveal .box {
+      border: 1px solid #333; border-left: 3px solid var(--accent);
+      padding: 16px 24px; border-radius: 4px; background: rgba(255,255,255,0.03);
+      text-align: left; font-size: 0.7em;
+    }
+    .reveal .box.warn { border-left-color: var(--accent2); }
+    .reveal .thought {
+      border: 1px dashed #444; padding: 12px 20px; border-radius: 8px;
+      background: rgba(0,255,159,0.04); text-align: left; font-size: 0.6em;
+      font-style: italic; margin: 20px auto; width: 85%;
+    }
+    .reveal .thought::before { content: "💭 "; font-style: normal; }
+    .reveal blockquote {
+      border-left: 4px solid var(--accent); background: rgba(0,255,159,0.05);
+      font-style: normal; width: 90%;
+    }
+    .reveal table td, .reveal table th { font-size: 0.7em; }
+    .reveal .timeline {
+      text-align: left; font-size: 0.55em; line-height: 1.8;
+      border-left: 2px solid #333; padding-left: 24px; margin-left: 20px;
+    }
+    .reveal .timeline .t { color: var(--dim); display: inline-block; width: 70px; }
+  </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================================ -->
+<!-- TITLE                                                        -->
+<!-- ============================================================ -->
+<section data-background-gradient="linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%)">
+  <h1>Let's Hack<br><span class="accent">From The Beginning</span></h1>
+  <p class="dim">HackTheBay 3.0 · Workshop</p>
+  <p style="margin-top:60px;">
+    <strong>Rotem Bar</strong><br>
+    <span class="dim small">Hacker · Security Researcher · Palo Alto Networks</span>
+  </p>
+  <aside class="notes">
+    Show of hands — who has never found a bug in something real? Who found one
+    and froze? This is for you. We're not doing 50 techniques today. We're
+    doing ONE bug properly, then showing you it's always the same bug.
+  </aside>
+</section>
+
+<section>
+  <h2>This talk is not a checklist</h2>
+  <p class="fragment small">
+    You can google "XSS payloads" right now. You'll get 10,000.<br>
+    <span class="dim">None of them will tell you where to put them.</span>
+  </p>
+  <p class="fragment small" style="margin-top:40px;">
+    What I want to give you is <span class="accent">how I decide what to try next.</span><br>
+    The part that doesn't fit in a cheat sheet.
+  </p>
+  <aside class="notes">
+    Every beginner talk lists techniques. But when you sit in front of a real
+    app, the problem isn't "I don't know what SQL injection is." It's "I have
+    no idea where to even click." That's what we fix today.
+  </aside>
+</section>
+
+<section>
+  <h2>The plan</h2>
+  <div class="cols small">
+    <div class="col box">
+      <strong class="accent">Part 1</strong> · Mindset<br>
+      <span class="dim">The three questions. That's it.</span>
+    </div>
+    <div class="col box">
+      <strong class="accent">Part 2</strong> · One bug, slowly<br>
+      <span class="dim">Every thought I had. Including the wrong ones.</span>
+    </div>
+  </div>
+  <div class="cols small" style="margin-top:20px;">
+    <div class="col box">
+      <strong class="accent">Part 3</strong> · Three more, fast<br>
+      <span class="dim">Spot the pattern.</span>
+    </div>
+    <div class="col box">
+      <strong class="accent">Part 4</strong> · Before AI / With AI<br>
+      <span class="dim">What changed. What didn't.</span>
+    </div>
+  </div>
+  <p class="dim tiny fragment" style="margin-top:30px;">Then: workshop. You break things. I heckle.</p>
+</section>
+
+<!-- ============================================================ -->
+<!-- PART 1 — MINDSET                                             -->
+<!-- ============================================================ -->
+<section data-background-color="#0d1b2a">
+  <section>
+    <h1><span class="dim">Part 1</span><br>The Mindset</h1>
+    <p class="dim tiny">this part is short. on purpose.</p>
+  </section>
+
+  <section>
+    <h2>You already do this</h2>
+    <p class="fragment">Ever debugged code that <em>should</em> work?</p>
+    <p class="fragment">Stared at it until you noticed the one assumption that was wrong?</p>
+    <p class="fragment" style="margin-top:40px;">
+      <span class="accent">That's hacking.</span><br>
+      <span class="small dim">Same skill. Different target. Their assumptions instead of yours.</span>
+    </p>
+    <aside class="notes">
+      Important reframe for developers in the room. You're not learning a new
+      skill. Debugging is: "the program is doing something I don't expect,
+      find out why." Hacking is: "make the program do something THEY don't
+      expect." Same muscle.
+    </aside>
+  </section>
+
+  <section>
+    <h2>You are not a pentester</h2>
+    <h2 class="fragment">You are a <span class="accent">very confused user</span></h2>
+    <p class="fragment small" style="margin-top:40px;">
+      The app expects you to click "Submit".<br>
+      You click "Submit" and then ask: <em>what did that actually send?</em>
+    </p>
+    <aside class="notes">
+      Methodology comes later. Scanners come later. Step one is just...
+      watching. Using the app with DevTools open. Being nosy.
+    </aside>
+  </section>
+
+  <section>
+    <h2>Three questions. Tattoo them.</h2>
+    <ol>
+      <li class="fragment">Where does <span class="accent">my input</span> go?</li>
+      <li class="fragment">What does the server <span class="accent">trust</span> that it shouldn't?</li>
+      <li class="fragment">What happens if I <span class="accent">lie</span>?</li>
+    </ol>
+    <p class="fragment tiny dim" style="margin-top:40px;">
+      Every OWASP category is one of these three, wearing a costume.
+    </p>
+    <aside class="notes">
+      I'm going to keep coming back to these. Every bug in this talk answers
+      one of them. SQL injection = "where does my input go" (into a query).
+      IDOR = "what does it trust" (the ID I sent). Password reset bypass =
+      "what if I lie" (about which account I am).
+    </aside>
+  </section>
+
+  <section>
+    <h2>When you find something weird</h2>
+    <div class="box">
+      You get <strong class="accent">15 minutes</strong> to chase it.<br><br>
+      After 15 minutes: <strong>write it down.</strong> One line. Move on.<br><br>
+      <span class="dim">90% of my real bugs came from the "come back later" list.<br>
+      Weird stays weird. It'll still be there.</span>
+    </div>
+    <aside class="notes">
+      The list is everything. Beginners either ignore the weird thing (and
+      lose the bug) or chase it for 3 hours (and lose the day). 15 minutes.
+      Write it down. The Elementor CVE sat on my list for 2 weeks.
+    </aside>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- PART 2 — ONE BUG, SLOWLY                                     -->
+<!-- ============================================================ -->
+<section data-background-color="#1a1a2e">
+  <section>
+    <h1><span class="dim">Part 2</span><br>One Bug, <span class="accent">Slowly</span></h1>
+    <p class="dim small">Restaurant SaaS platform · Critical · $2,000</p>
+    <p class="tiny dim">Every decision. Every wrong turn. The whole thing.</p>
+    <aside class="notes">
+      This is the core of the talk. I'm going to walk through ~20 minutes of
+      actual work, slowed down. The bug is not impressive. The PROCESS is
+      what I want you to take home.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Minute 0: What am I even looking at</h3>
+    <div class="box small">
+      Restaurant management dashboard. Orders, menus, payouts.<br>
+      I have a free trial account. One fake restaurant.
+    </div>
+    <div class="thought fragment">
+      I don't know this app. I don't know what it does. I'm going to click
+      every button and watch the Network tab. Not testing anything yet.
+      Just learning what "normal" looks like.
+    </div>
+    <p class="tiny dim fragment">← This step is where most people skip ahead. Don't.</p>
+    <aside class="notes">
+      You can't find "abnormal" if you don't know "normal". I spend the first
+      20 minutes on ANY target just... using it. Like a customer. DevTools
+      open, Network tab filtered to XHR. Watching.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Minute 5: Something boring catches my eye</h3>
+    <pre><code class="http" data-trim data-line-numbers>
+GET /api/feature-flags HTTP/1.1
+
+HTTP/1.1 200 OK
+{
+  "new_menu_editor": true,
+  "payouts_v2": false,
+  "export_beta": false,
+  "bulk_refunds": false,
+  ...
+}
+    </code></pre>
+    <div class="thought fragment">
+      Feature flags. Some are <code>false</code>. Question #2:
+      what does the server trust? It trusts these flags to hide things from me.
+      But the flags are coming TO me. In my browser.
+    </div>
+    <aside class="notes">
+      I'm not excited yet. Feature flags are everywhere. But notice the
+      QUESTION that fired: "what does it trust?" It trusts these booleans
+      to gate features. And it's sending them to a place I control.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Minute 6: Okay so what if I lie</h3>
+    <p class="small">Burp → Proxy → Match and Replace → Response body:</p>
+    <pre><code class="text" data-trim>
+Match:    "enabled": false
+Replace:  "enabled": true
+    </code></pre>
+    <div class="thought fragment">
+      I'm not trying to "hack" anything. I just want to see what the UI
+      looks like with everything turned on. Maybe it's all placeholder.
+      Maybe there's nothing there. One way to find out.
+    </div>
+    <p class="tiny dim fragment">
+      Cost of this experiment: <span class="accent">30 seconds.</span>
+      That's why you try it.
+    </p>
+    <aside class="notes">
+      This is Question #3: what if I lie? But notice — I'm not lying to the
+      SERVER yet. I'm lying to my own BROWSER. Low risk. Fast. Just seeing
+      what's behind the curtain.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Minute 7: Refresh. New buttons.</h3>
+    <div class="box small">
+      Three new things appeared in the UI:<br><br>
+      <span class="dim">1.</span> A "Bulk Refund" button <span class="dim">(looks half-built, form doesn't submit)</span><br>
+      <span class="dim">2.</span> A new menu editor <span class="dim">(works, boring)</span><br>
+      <span class="dim">3.</span> An <span class="accent">"Export" button on the Payouts page</span>
+    </div>
+    <div class="thought fragment">
+      "Export" is a <span class="accent2">cursed word</span>. Export features
+      are always added late, by a different team, under time pressure.
+      They copy the auth check. They forget the ownership check.
+    </div>
+    <aside class="notes">
+      This is pattern recognition from experience — but you can BORROW mine.
+      "Export", "Report", "Download CSV", "Bulk" — these words mean "built
+      fast, tested less." You'll build your own list of cursed words.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Minute 8: I click the button</h3>
+    <pre><code class="http" data-trim data-line-numbers="1-2|4-7">
+POST /api/payouts/export HTTP/1.1
+Authorization: Bearer eyJ...
+
+HTTP/1.1 200 OK
+{
+  "download_url": "https://blob.../PAYOUT-bd78d6....csv?X-Amz-Signature=..."
+}
+    </code></pre>
+    <div class="thought fragment">
+      It worked. It actually worked. The feature was "hidden" but the API
+      was live. Okay — but this might still be fine. Let me download the
+      CSV and see what's in it before I get excited.
+    </div>
+    <aside class="notes">
+      Important: I haven't found a bug yet. The button works — so what?
+      Maybe it exports MY data. That's... a feature. Don't report yet.
+      Look at what you actually got.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Minute 9: Open the CSV</h3>
+    <pre><code class="text" data-trim>
+restaurant_id, restaurant_name,    period,   amount,    bank_last4
+8812,          Rotem's Test Cafe,  2024-Q4,  $0.00,     ****1234
+1003,          Mario's Pizza NYC,  2024-Q4,  $48,203,   ****8821
+1005,          Golden Dragon SF,   2024-Q4,  $31,887,   ****4420
+1007,          ...
+    </code></pre>
+    <div class="thought fragment">
+      That is not my data. That is <span class="accent2">everyone's</span> data.
+    </div>
+    <p class="tiny dim fragment">Critical. Report. Done.</p>
+    <aside class="notes">
+      NOW it's a bug. The endpoint had auth (you need a valid session) but no
+      FILTER. It dumped the whole table. The developer assumed: "this button
+      is hidden, so only internal people will click it." The button was
+      hidden. The API was not.
+    </aside>
+  </section>
+
+  <section>
+    <h3>The whole thing, compressed</h3>
+    <div class="timeline">
+      <span class="t">00:00</span> Open app. DevTools. Click around.<br>
+      <span class="t">05:00</span> Notice feature-flag response. <span class="accent">Q2: what does it trust?</span><br>
+      <span class="t">06:00</span> Flip all flags to true in my browser. <span class="accent">Q3: what if I lie?</span><br>
+      <span class="t">07:00</span> New "Export" button appears. Cursed word.<br>
+      <span class="t">08:00</span> Click it. API is live. Get a CSV URL.<br>
+      <span class="t">09:00</span> Open CSV. It's everyone's payout data.<br>
+      <span class="t">09:30</span> Write report.<br>
+    </div>
+    <p class="fragment small" style="margin-top:30px;">
+      <span class="accent2">Nine minutes.</span> No Burp Intruder. No payloads.
+      No scanner. Just <span class="accent">looking, and asking the three questions.</span>
+    </p>
+    <aside class="notes">
+      THIS is what I want you to remember. Not the bug — the rhythm.
+      Look → notice → question → cheap experiment → look at result → repeat.
+      The bug falls out of the process. You don't aim at it.
+    </aside>
+  </section>
+
+  <section>
+    <h3>The two lessons</h3>
+    <div class="cols">
+      <div class="col box">
+        <strong class="accent">Hidden ≠ Protected</strong><br><br>
+        If the gate is in the frontend,<br>there is no gate.<br><br>
+        <span class="dim tiny">Feature flags, <code>disabled</code> buttons, commented-out HTML,
+        <code>display:none</code> — all of it is a suggestion.</span>
+      </div>
+      <div class="col box">
+        <strong class="accent">Try the cheap thing</strong><br><br>
+        Flipping flags cost 30 seconds.<br>If it did nothing: 30 seconds lost.<br><br>
+        <span class="dim tiny">Beginners overthink. "Is this worth trying?"
+        If it takes under a minute — just try it.</span>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- PART 3 — THREE MORE, FAST                                    -->
+<!-- ============================================================ -->
+<section data-background-color="#1a1a2e">
+  <section>
+    <h1><span class="dim">Part 3</span><br>Three More, <span class="accent">Fast</span></h1>
+    <p class="dim small">Different apps. Same three questions.</p>
+    <aside class="notes">
+      Now I speed up. Three bugs, ~2 min each. The goal: you start to see
+      the SHAPE repeat. By the third one you should be ahead of me.
+    </aside>
+  </section>
+
+  <!-- Bug 2: OTP -->
+  <section>
+    <h3><span class="dim">Bug 2</span> · Password reset <span class="tag">$3k</span></h3>
+    <p class="small">Retail chain. SMS OTP flow. Standard stuff.</p>
+    <pre><code class="http" data-trim data-line-numbers="1-3|5-8">
+# Step 1 — I ask for a code to MY phone
+POST /forgottenPassword  {"target": "555-0001"}
+→ SMS arrives with code 090038
+
+# Step 2 — I submit the code
+POST /forgottenpasswordtokens
+{ "otpVerify": { "target": "555-0001", "passphrase": "090038" },
+  "mobile":    "555-0001" }
+    </code></pre>
+    <div class="thought fragment">
+      Wait. Why is the phone number in there <span class="accent2">twice</span>?
+      <code>otpVerify.target</code> and <code>mobile</code>. Same value.
+      If they were always the same... you'd only need one.
+    </div>
+  </section>
+
+  <section>
+    <h3><span class="dim">Bug 2</span> · What if I lie</h3>
+    <pre><code class="http" data-trim data-line-numbers="3-4|6">
+POST /forgottenpasswordtokens
+{ "otpVerify": { "target": "555-0001", "passphrase": "090038" },
+  "mobile":    "555-9999" }     ← victim's number
+
+→ { "token": "eyJ...sub: VICTIM_USER_ID..." }
+    </code></pre>
+    <div class="box small fragment">
+      OTP was checked against <code>otpVerify.target</code> ✅<br>
+      User to reset was looked up by <code>mobile</code> ✗<br>
+      <span class="accent2">Two fields. One validated. Account takeover on anyone.</span>
+    </div>
+    <aside class="notes">
+      Same three questions. Q1: where does my input go? Into TWO places.
+      Q2: what does it trust? It trusts both fields to match. Q3: what if
+      I lie? I make them NOT match.
+      The tell was the duplication. Duplication = two code paths. Two code
+      paths = one of them is wrong.
+    </aside>
+  </section>
+
+  <!-- Bug 3: SSRF -->
+  <section>
+    <h3><span class="dim">Bug 3</span> · Follow the weird <span class="tag">$20k</span></h3>
+    <p class="small">Secure messaging app. File download by GUID.</p>
+    <pre><code class="http" data-trim data-line-numbers="1-3|5-7">
+# Normal request
+GET /fileproxy?guid=a1b2c3d4-...-f00d
+→ 200 OK [file bytes]
+
+# I send a guid with one character changed. Expecting: 404
+GET /fileproxy?guid=a1b2c3d4-...-f00e
+→ 200 OK &lt;!DOCTYPE html&gt;&lt;title&gt;HackerOne&lt;/title&gt;...
+    </code></pre>
+    <div class="thought fragment">
+      I asked for a file. It gave me HTML. Of hackerone.com.<br>
+      My test account email is <code>@wearehackerone.com</code>.<br>
+      ...did it just <span class="accent2">fetch my email domain?</span>
+    </div>
+    <aside class="notes">
+      We weren't looking for this. We were testing something ELSE. Sent a bad
+      GUID expecting an error. Got HTML instead. That is WEIRD. And weird =
+      stop everything, 15 minute timer, chase it.
+    </aside>
+  </section>
+
+  <section>
+    <h3><span class="dim">Bug 3</span> · Chase it for 15 minutes</h3>
+    <pre><code class="text" data-trim data-line-numbers="1-3|5-7|9-11">
+# Theory: GUID not found → fallback → fetch email domain as URL
+# Test: register new account with email me@my-server.com
+
+GET /fileproxy?guid={invalid}
+→ my-server.com gets a hit ✅  theory confirmed
+
+# my-server.com now responds: 302 → http://169.254.169.254/latest/...
+GET /fileproxy?guid={invalid}
+→ {"AccessKeyId":"ASIA...","SecretAccessKey":"...","Token":"..."}
+    </code></pre>
+    <p class="tiny dim fragment">
+      Error branch → URL fetch → follows redirects → AWS metadata → prod IAM creds.<br>
+      <span class="accent">The bug was in the code path nobody reviewed.</span>
+    </p>
+    <aside class="notes">
+      The happy path had tests. The "GUID not found" branch was a dev
+      shortcut that shipped. $20k. Q1: where does my input go — into a
+      URL fetcher, apparently. Q2: what does it trust — it trusts that
+      GUIDs are always found. Q3 answered itself.
+    </aside>
+  </section>
+
+  <!-- Bug 4: AWS postMessage -->
+  <section>
+    <h3><span class="dim">Bug 4</span> · Read the check <span class="tag">AWS Console</span></h3>
+    <p class="small">Pop DevTools. Sources tab. Ctrl+Shift+F: <code>addEventListener('message'</code></p>
+    <pre><code class="javascript" data-trim data-line-numbers="1-4|2">
+window.addEventListener('message', (e) => {
+  if (/amazon\.com/.test(e.origin)) {
+    handle(e.data);
+  }
+});
+    </code></pre>
+    <div class="thought fragment">
+      Regex. No <code>$</code> at the end.<br>
+      <code>/amazon\.com/</code> matches <code>amazon.com.evil.net</code>. And <code>evilamazon.com</code>.<br>
+      That's Question #2. It <span class="accent">trusts</span> that regex to validate origin. Badly.
+    </div>
+    <aside class="notes">
+      This one is different — I didn't poke the app. I READ the app.
+      Searched for the message handler, read the origin check, spotted the
+      missing anchor. Five minutes. The handler only controlled dark mode
+      so small bounty — but this EXACT pattern, with real impact, I've hit
+      a dozen times. When you see an origin check, read it like a regex
+      crossword. Where's the hole?
+    </aside>
+  </section>
+
+  <section>
+    <h3>It's the same bug</h3>
+    <table class="small">
+      <tr><th></th><th>Q2: What does it trust?</th><th>Q3: The lie</th></tr>
+      <tr><td><strong class="accent">Export</strong></td><td>Frontend hides the button</td><td>Flip the flags</td></tr>
+      <tr><td><strong class="accent">Password reset</strong></td><td>Two fields match</td><td>Make them not match</td></tr>
+      <tr><td><strong class="accent">File proxy</strong></td><td>GUIDs are always valid</td><td>Send a bad one</td></tr>
+      <tr><td><strong class="accent">postMessage</strong></td><td>Regex validates origin</td><td>Domain that matches anyway</td></tr>
+    </table>
+    <p class="fragment small" style="margin-top:30px;">
+      Different tech. Different payloads. <span class="accent">Same two questions, every time.</span>
+    </p>
+    <aside class="notes">
+      This is the whole talk on one slide. You don't need 100 techniques.
+      You need to ask "what does it trust" and "what if I lie" over and over
+      until something falls over. The techniques are just HOW you lie in a
+      specific context. The questions are the job.
+    </aside>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- PART 4 — BEFORE AI / WITH AI                                 -->
+<!-- ============================================================ -->
+<section data-background-color="#0d1b2a">
+  <section>
+    <h1><span class="dim">Part 4</span><br>Before AI<span class="dim"> / </span><span class="accent">With AI</span></h1>
+    <p class="dim small">What changed. What didn't. How to use it without rotting your brain.</p>
+  </section>
+
+  <!-- Before AI -->
+  <section>
+    <h3>How I used to learn a target <span class="tag warn">~2019</span></h3>
+    <pre><code class="bash" data-trim>
+# Download their main.js. 400KB minified hell.
+curl https://target.com/static/main.a8f3c.js -o main.js
+js-beautify main.js > readable.js   # 18,000 lines
+
+# Then just... grep. For hours.
+grep -n "fetch\|axios\|XMLHttpRequest" readable.js   # find API calls
+grep -n "localStorage\|sessionStorage\|cookie" readable.js
+grep -n "postMessage\|addEventListener" readable.js
+grep -n "eval\|innerHTML\|document.write" readable.js
+
+# Open readable.js at each line number. Read around it.
+# Build a map in your head. Where does data flow?
+    </code></pre>
+    <p class="tiny dim fragment">Slow. Painful. Boring. <span class="accent">And it built intuition that never left.</span></p>
+    <aside class="notes">
+      This is what it looked like. Hours of grep and reading. And it SUCKED.
+      But — by the time you'd read 18,000 lines of their code, you UNDERSTOOD
+      that app. You knew where the bodies were buried. That understanding is
+      where bugs come from.
+    </aside>
+  </section>
+
+  <section>
+    <h3>What the grind actually gave you</h3>
+    <div class="cols small">
+      <div class="col box">
+        <strong class="accent">Pattern library in your head</strong><br><br>
+        You've read 50 broken origin checks. The 51st, you see it in
+        two seconds. Not because you're smart — because you've seen it.
+      </div>
+      <div class="col box">
+        <strong class="accent">A feel for "weird"</strong><br><br>
+        Noticing the duplicate field. Noticing the fallback branch.
+        That's not a technique. It's <em>miles</em>. You only get it by
+        reading code that wasn't yours.
+      </div>
+    </div>
+    <p class="fragment tiny dim" style="margin-top:30px;">
+      This is the part I'm worried beginners will skip now.<br>
+      <span class="accent2">Don't skip it.</span> Just do it faster.
+    </p>
+    <aside class="notes">
+      The "10,000 hours" thing is overblown but there's a core truth: you
+      need REPS. Reading code, poking apps, seeing what broke. AI compresses
+      this — but it doesn't replace it. You still need to build the "huh,
+      that's weird" detector. AI doesn't have one. It has averages.
+    </aside>
+  </section>
+
+  <!-- With AI — the good -->
+  <section>
+    <h3>Now: AI as a thinking partner <span class="tag">the good</span></h3>
+    <div class="box small">
+      <strong>Paste the minified JS you don't understand:</strong><br>
+      <span class="dim">"Explain what this function does. What inputs does it take?
+      Where do those inputs come from? What would make it misbehave?"</span><br><br>
+
+      <strong>Paste the validation you're staring at:</strong><br>
+      <span class="dim">"This checks a callback URL. List every way a malicious URL
+      could pass this check. Assume I can register any domain."</span><br><br>
+
+      <strong>When you're stuck:</strong><br>
+      <span class="dim">"I can inject into header X of an internal request. I can't
+      see the response. What can I do with a blind header injection?"</span>
+    </div>
+    <p class="tiny dim fragment">It's a rubber duck that knows every RFC.</p>
+    <aside class="notes">
+      THIS is the unlock. Not "find bugs for me." It's "help me THINK about
+      this specific piece." It's a senior engineer you can ask dumb questions
+      at 3am. It knows what \u2028 does. It knows IMDSv2 hop limits. It knows
+      every obscure browser quirk. USE that.
+    </aside>
+  </section>
+
+  <section>
+    <h3>My actual prompts, on real bugs</h3>
+    <div class="box small" style="font-family: ui-monospace, monospace;">
+      <span class="dim">// the OTP bug — I saw the duplicate fields, asked:</span><br>
+      "Here's a password reset request with both <code>otpVerify.target</code> and
+      <code>mobile</code> set to the same phone. Why would a backend need both?
+      What goes wrong if I change only one?"<br><br>
+
+      <span class="dim">// the postMessage regex — I knew it was wrong, asked:</span><br>
+      "This regex validates origin: <code>/amazon\.com/</code>. Give me 10
+      domains I could register that would match"<br><br>
+
+      <span class="dim">// reading a 2000-line bundle, asked:</span><br>
+      "Summarize every place this code writes to <code>window.location</code>
+      or <code>innerHTML</code>. For each, trace back where the input comes from."
+    </div>
+    <aside class="notes">
+      Notice: I already noticed the weird thing. I already had a hypothesis.
+      The AI helped me EXPAND it, or CONFIRM it faster. It didn't FIND the
+      weird thing. I did. That's still your job.
+    </aside>
+  </section>
+
+  <!-- With AI — the trap -->
+  <section>
+    <h3>The trap <span class="tag warn">don't do this</span></h3>
+    <pre><code class="text" data-trim>
+You:  "Here is the source code of an app. Find all the vulnerabilities."
+
+AI:   "Potential issues I noticed:
+       1. This endpoint might be vulnerable to SQL injection
+       2. This function could have XSS if user input reaches it
+       3. Rate limiting may be insufficient
+       ..."
+    </code></pre>
+    <p class="fragment small">
+      <span class="accent2">Everything "might be" and "could have."</span>
+      It's pattern-matching on what bugs usually look like.<br>
+      It doesn't know what's weird about <em>THIS</em> app. You do.
+    </p>
+    <aside class="notes">
+      AI is trained on average code. It finds average bugs — the ones that
+      look like textbook examples. The real bugs are in the SPECIFIC weirdness
+      of THIS codebase: the fallback branch, the duplicate field, the feature
+      flag. Those don't pattern-match. Those take a human going "huh."
+    </aside>
+  </section>
+
+  <section>
+    <h3>The actual division of labor</h3>
+    <table class="small">
+      <tr><th class="accent">Still your job</th><th class="accent2">Outsource to AI</th></tr>
+      <tr><td>Noticing the weird thing</td><td>Explaining what minified code does</td></tr>
+      <tr><td>Asking "what if I lie here?"</td><td>Listing 20 WAYS to lie</td></tr>
+      <tr><td>Knowing what's normal for THIS app</td><td>Knowing what's normal for ALL apps</td></tr>
+      <tr><td>Deciding what to try next</td><td>Writing the PoC once you know what works</td></tr>
+      <tr><td>Reading the response and going "huh"</td><td>Decoding the response format</td></tr>
+    </table>
+    <p class="fragment tiny dim" style="margin-top:30px;">
+      Left column is intuition. Right column is knowledge.<br>
+      <span class="accent">AI has infinite knowledge and zero intuition.</span> You're the opposite. Good trade.
+    </p>
+    <aside class="notes">
+      This is the frame I want you to leave with. You bring curiosity and
+      context. AI brings encyclopedic knowledge and infinite patience.
+      Neither of you finds the bug alone. Together you find it in 9 minutes
+      instead of 2 hours.
+    </aside>
+  </section>
+
+  <section>
+    <h3>A beginner loop that works now</h3>
+    <div class="timeline">
+      <span class="t">1.</span> Use the app. DevTools open. <span class="accent">(you)</span><br>
+      <span class="t">2.</span> Something looks off. Screenshot it. <span class="accent">(you)</span><br>
+      <span class="t">3.</span> "Explain what this code does" → paste it <span class="accent2">(AI)</span><br>
+      <span class="t">4.</span> "What could go wrong here?" <span class="accent2">(AI)</span><br>
+      <span class="t">5.</span> Pick the suggestion that matches YOUR weird feeling <span class="accent">(you)</span><br>
+      <span class="t">6.</span> Try it. Look at the result. <span class="accent">(you)</span><br>
+      <span class="t">7.</span> "I got this response, what does it mean?" <span class="accent2">(AI)</span><br>
+      <span class="t">8.</span> Repeat from 2.<br>
+    </div>
+    <p class="fragment tiny dim">Same loop as before. Just the slow parts are faster.</p>
+    <aside class="notes">
+      This is literally the 9-minute restaurant-SaaS bug, but at step 3 you
+      could've asked "what is a feature flag response used for" and gotten
+      to the flag-flip idea in 30 seconds instead of 2 minutes. Small speedup.
+      But over a day, over a career — compound interest.
+    </aside>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- WRAP                                                         -->
+<!-- ============================================================ -->
+<section data-background-color="#0d1b2a">
+  <section>
+    <h2>The whole talk in one box</h2>
+    <div class="box">
+      <strong class="accent">1.</strong> Watch the app until you know what normal looks like.<br>
+      <strong class="accent">2.</strong> Ask: where does my input go · what does it trust · what if I lie.<br>
+      <strong class="accent">3.</strong> Try the cheap thing. Under 60 seconds? Just try it.<br>
+      <strong class="accent">4.</strong> Weird response → 15 minutes → write it down.<br>
+      <strong class="accent">5.</strong> Stuck on the HOW? Ask AI. Stuck on the WHAT? That's you.<br>
+    </div>
+    <p class="fragment tiny dim" style="margin-top:30px;">
+      That's it. Go click buttons.
+    </p>
+  </section>
+
+  <section>
+    <h2>You don't need permission to start</h2>
+    <p class="small">
+      You need a <span class="accent">legal target</span> and <span class="accent">curiosity</span>.<br><br>
+      Legal targets: PortSwigger Web Academy <span class="dim">(free, superb)</span> ·<br>
+      HackTheBox · Juice Shop · bug bounty programs with clear scope ·<br>
+      your own side project · that router in your closet
+    </p>
+    <div class="box warn small fragment">
+      <strong>The one rule:</strong> if you're not sure you're allowed — you're not allowed. Ask.
+    </div>
+  </section>
+
+  <section>
+    <h1>🛠️ Workshop Time</h1>
+    <p class="small">
+      Labs: <code class="accent">labs/</code> folder in the repo<br><br>
+      Each lab is one of the four bugs you just saw — with training wheels.<br>
+      Pair up. Talk through your thinking out loud.<br>
+      Shout if you're stuck. I'll come heckle.
+    </p>
+    <p class="dim tiny">WiFi: HackTheBay-Workshop · password on the whiteboard</p>
+  </section>
+
+  <section>
+    <h2>Thanks! Go be confused.</h2>
+    <p>
+      <strong>Rotem Bar</strong><br>
+      <span class="dim small">
+        @rotembar · linkedin.com/in/rotembar<br>
+        Slides + labs: github.com/rotemb/hackthebay-workshop
+      </span>
+    </p>
+    <p class="tiny dim" style="margin-top:80px;">
+      Questions? After, during workshop, or at the bar. Bar preferred.
+    </p>
+  </section>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/plugin/search/search.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    controlsTutorial: false,
+    plugins: [ RevealHighlight, RevealNotes, RevealSearch ]
+  });
+</script>
+</body>
+</html>
