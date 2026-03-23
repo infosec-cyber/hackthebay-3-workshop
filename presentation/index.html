@@ -17,6 +17,7 @@
       --r-heading-text-transform: none;
       --accent: #00ff9f;
       --accent2: #ff0066;
+      --accent3: #ffcc00;
       --dim: #6b7280;
     }
     .reveal h1, .reveal h2, .reveal h3 { letter-spacing: -0.02em; }
@@ -43,6 +44,8 @@
       text-align: left; font-size: 0.7em;
     }
     .reveal .box.warn { border-left-color: var(--accent2); }
+    .reveal .box.story { border-left-color: var(--accent3); background: rgba(255,204,0,0.03); }
+    .reveal .accent3 { color: var(--accent3); }
     .reveal .thought {
       border: 1px dashed #444; padding: 12px 20px; border-radius: 8px;
       background: rgba(0,255,159,0.04); text-align: left; font-size: 0.6em;
@@ -1184,7 +1187,14 @@ AI:   "Potential issues I noticed:
 
   <section>
     <h3><span class="accent">01</span> Web Apps</h3>
-    <table class="small">
+    <div class="box story small">
+      <strong class="accent3">The header nobody checks · paid 8.5</strong><br>
+      Every body param, every query string — WAF blocked <code>'</code> instantly.
+      <code>Referer</code> header? Logged straight into an analytics table. Raw.<br>
+      <code class="accent3 tiny">Referer: https://x.com/'||(SELECT CASE WHEN(1=1) THEN pg_sleep(5) END)||'</code><br>
+      <span class="dim">5-second delay. The WAF watched the front door. I walked in through the HVAC.</span>
+    </div>
+    <table class="small" style="margin-top:20px;">
       <tr><td><strong>Practice</strong></td><td>PortSwigger Web Security Academy — do all of Access Control first</td></tr>
       <tr><td><strong>Tool</strong></td><td>Burp Community / Caido — <em>after</em> you understand the app</td></tr>
       <tr><td><strong>Extension</strong></td><td>Autorize (Burp) — automates "can user A do user B's thing?"</td></tr>
@@ -1194,7 +1204,15 @@ AI:   "Potential issues I noticed:
 
   <section>
     <h3><span class="accent">02</span> APIs</h3>
-    <table class="small">
+    <div class="box story small">
+      <strong class="accent3">GraphQL introspection was off. Errors weren't.</strong><br>
+      <code>query { user { xyz } }</code> →
+      <code class="accent3">"Cannot query field 'xyz'. Did you mean 'xxxSecretField'?"</code><br>
+      <span class="dim">Bruteforced the entire schema via typo suggestions. 40 min.
+      Found an <code>internalNotes</code> field on every customer record.
+      (Tool now exists: clairvoyance.)</span>
+    </div>
+    <table class="small" style="margin-top:20px;">
       <tr><td><strong>Read</strong></td><td>OWASP API Security Top 10 — different list than web!</td></tr>
       <tr><td><strong>Practice</strong></td><td>crAPI, vAPI, DVGA (Damn Vulnerable GraphQL App)</td></tr>
       <tr><td><strong>Tool</strong></td><td><code>clairvoyance</code> — schema recon via error messages</td></tr>
@@ -1204,7 +1222,15 @@ AI:   "Potential issues I noticed:
 
   <section>
     <h3><span class="accent">03</span> Auth & Sessions</h3>
-    <table class="small">
+    <div class="box story small">
+      <strong class="accent3">The field swap · found 5+ times</strong><br>
+      Multi-step signup. Step 1: email + phone → OTP to phone. Step 2: verify OTP ✅.
+      Step 3: set password.<br>
+      <span class="accent3">Between step 2 and 3, I changed the email to victim@target.com.</span><br>
+      <span class="dim">Server: "phone verified = user verified." Never re-checked email.
+      I own victim's account. My phone. Their email. Multi-step flows trust earlier steps stay true. They don't.</span>
+    </div>
+    <table class="small" style="margin-top:20px;">
       <tr><td><strong>Tool</strong></td><td><code>jwt_tool</code> — <code>-M at</code> runs all attacks automatically</td></tr>
       <tr><td><strong>Tool</strong></td><td><code>flask-unsign</code> — crack Flask session secrets with wordlist</td></tr>
       <tr><td><strong>Read</strong></td><td>OAuth 2.0 Threat Model (RFC 6819) — dense but gold</td></tr>
@@ -1214,7 +1240,14 @@ AI:   "Potential issues I noticed:
 
   <section>
     <h3><span class="accent">04</span> Browser / Client-Side</h3>
-    <table class="small">
+    <div class="box story small">
+      <strong class="accent3">Finding prototype pollution in 30 seconds</strong><br>
+      In DevTools console on the target:<br>
+      <code class="tiny">Object.prototype.innerHTML = '&lt;img src=x onerror=alert(1)&gt;';</code><br>
+      <span class="dim">Refresh. Click things. Wait for the pop. If anything breaks weirdly → there's a gadget.
+      Client-side PP → XSS. Server-side PP (Node) → RCE. Same bug.</span>
+    </div>
+    <table class="small" style="margin-top:20px;">
       <tr><td><strong>Tool</strong></td><td>DOM Invader (Burp browser) — auto-finds sinks</td></tr>
       <tr><td><strong>Tool</strong></td><td>PP-finder, protoscan for prototype pollution</td></tr>
       <tr><td><strong>Read</strong></td><td>PortSwigger prototype pollution research series</td></tr>
@@ -1224,7 +1257,16 @@ AI:   "Potential issues I noticed:
 
   <section>
     <h3><span class="accent">05</span> Mobile</h3>
-    <table class="small">
+    <div class="box story small">
+      <strong class="accent3">TikTok · one tap → full ATO</strong><br>
+      Deep link handler → loads URL in internal WebView.
+      Validation: <code>url.contains("tiktok.com")</code>.
+      My URL: <code class="accent3">https://evil.net/?tiktok.com</code><br>
+      <span class="dim">WebView loads my page. WebView has <code>addJavascriptInterface</code>
+      exposing native methods. One of them: "get auth token."
+      One link via SMS → account takeover. The attack surface isn't the app — it's the seams between app and OS.</span>
+    </div>
+    <table class="small" style="margin-top:20px;">
       <tr><td><strong>Static</strong></td><td>jadx, apktool, MobSF (all-in-one scanner)</td></tr>
       <tr><td><strong>Dynamic</strong></td><td>Frida + objection (bypass pinning in 1 command)</td></tr>
       <tr><td><strong>Read</strong></td><td>OWASP MASTG — the mobile testing bible</td></tr>
@@ -1234,7 +1276,16 @@ AI:   "Potential issues I noticed:
 
   <section>
     <h3><span class="accent">06</span> Cloud</h3>
-    <table class="small">
+    <div class="box story small">
+      <strong class="accent3">SSRF → IMDS. Blocked <code>169.254.169.254</code>? Cute.</strong><br>
+      <code class="tiny">0xA9FEA9FE</code> · <code class="tiny">2852039166</code> ·
+      <code class="tiny">[::ffff:169.254.169.254]</code> ·
+      <code class="tiny">169.254.169.254.nip.io</code> ·
+      302 redirect after the check · GCP? <code class="tiny">metadata.google.internal</code> — it's a hostname.<br>
+      <span class="dim">Then: <code>aws sts get-caller-identity</code> (not CloudTrail-logged by default) →
+      <code>secretsmanager list-secrets</code>. One SSRF = the whole account.</span>
+    </div>
+    <table class="small" style="margin-top:20px;">
       <tr><td><strong>Practice</strong></td><td>flaws.cloud, flaws2.cloud, CloudGoat, pwnedlabs.io</td></tr>
       <tr><td><strong>Tool</strong></td><td>Pacu (AWS exploitation), enumerate-iam, cloudfox</td></tr>
       <tr><td><strong>Read</strong></td><td>hackingthe.cloud — the wiki for all of this</td></tr>
@@ -1244,7 +1295,15 @@ AI:   "Potential issues I noticed:
 
   <section>
     <h3><span class="accent">07</span> CI/CD & Supply Chain</h3>
-    <table class="small">
+    <div class="box story small">
+      <strong class="accent3">The flag that lied · paid 8.9</strong><br>
+      CI ran <code>npm ci --ignore-scripts</code>. Safe, right? No install scripts = no RCE from a PR.<br>
+      My PR added one file: <code>.npmrc</code> → <code class="accent3">onload-script=./pwn.js</code><br>
+      <span class="dim"><code>--ignore-scripts</code> blocks <code>preinstall</code>/<code>postinstall</code>.
+      It does NOT block <code>onload-script</code>. Different mechanism. Undocumented.
+      Runner executed my JS with full env. The defense was correct. The assumption wasn't.</span>
+    </div>
+    <table class="small" style="margin-top:20px;">
       <tr><td><strong>Practice</strong></td><td>CI/CD Goat — 11 challenges, Jenkins + Gitea, our team built it</td></tr>
       <tr><td><strong>Read</strong></td><td>OWASP CI/CD Top 10 · "Top 10 CI/CD Security Risks" (Cider)</td></tr>
       <tr><td><strong>Tool</strong></td><td><code>zizmor</code> — static analysis for GitHub Actions</td></tr>
@@ -1254,7 +1313,15 @@ AI:   "Potential issues I noticed:
 
   <section>
     <h3><span class="accent">08</span> IoT / Firmware</h3>
-    <table class="small">
+    <div class="box story small">
+      <strong class="accent3">Automotive · one file, millions of cars</strong><br>
+      Telematics unit. Firmware from OEM portal → binwalk → squashfs.<br>
+      <code>/etc/ppp/chap-secrets</code> had the <span class="accent3">APN creds for the private
+      cellular network</span> every vehicle used. Same file. Same creds. Every car.<br>
+      <span class="dim">One firmware dump → lateral to the entire fleet's private network →
+      telematics backend → cloud. The blast radius is why I got into automotive.</span>
+    </div>
+    <table class="small" style="margin-top:20px;">
       <tr><td><strong>Extract</strong></td><td>binwalk, unblob, firmware-mod-kit</td></tr>
       <tr><td><strong>Analyze</strong></td><td>Ghidra (free!), firmwalker, EMBA</td></tr>
       <tr><td><strong>Emulate</strong></td><td>QEMU + firmadyne — run firmware without hardware</td></tr>
@@ -1265,7 +1332,15 @@ AI:   "Potential issues I noticed:
 
   <section>
     <h3><span class="accent">09</span> Source Code</h3>
-    <table class="small">
+    <div class="box story small">
+      <strong class="accent3">Elementor · CVE-2022-29455 · 6M+ sites</strong><br>
+      Noticed URL hash did… something on a client's WordPress. Weird. Added to <code>weird.md</code>.
+      Sat there 2 weeks. Slow Friday → grep the plugin for <code>location.hash</code>.<br>
+      <span class="dim">hash → decodeURIComponent → settings object → jQuery <code>.html()</code>.
+      No sanitizer. Working payload in 40 min. Then: this runs on every Elementor page.
+      The bug sat 2 weeks. The exploit took 2 hours. <span class="accent3">The list is everything.</span></span>
+    </div>
+    <table class="small" style="margin-top:20px;">
       <tr><td><strong>Tool</strong></td><td>Semgrep — grep that understands code structure. Free rules at semgrep.dev/r</td></tr>
       <tr><td><strong>Tool</strong></td><td>CodeQL — query bug classes across codebases. Steep curve, huge payoff</td></tr>
       <tr><td><strong>Tool</strong></td><td>weggli — like grep but for C/C++ ASTs (Google)</td></tr>
@@ -1275,7 +1350,15 @@ AI:   "Potential issues I noticed:
 
   <section>
     <h3><span class="accent">10</span> Recon</h3>
-    <table class="small">
+    <div class="box story small">
+      <strong class="accent3">The acquisition</strong><br>
+      Big tech company. Hardened main product. Crunchbase → acquired a startup 18 months ago.
+      Old domain still resolving. <code class="accent3">admin.oldstartup.com</code> → Django admin, <code>DEBUG=True</code>.<br>
+      <span class="dim">Stack trace exposed DB connection string. Same RDS instance now
+      backing the parent company's product. The acquisition integrated the data.
+      Nobody integrated the security. 30 min of OSINT beats a week fuzzing the front door.</span>
+    </div>
+    <table class="small" style="margin-top:20px;">
       <tr><td><strong>Discover</strong></td><td>subfinder, amass, assetfinder, github-subdomains</td></tr>
       <tr><td><strong>Probe</strong></td><td>httpx, nuclei, gowitness, aquatone</td></tr>
       <tr><td><strong>History</strong></td><td>waybackurls, gau, hakrawler</td></tr>
