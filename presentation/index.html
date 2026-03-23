@@ -59,6 +59,15 @@
       border-left: 2px solid #333; padding-left: 24px; margin-left: 20px;
     }
     .reveal .timeline .t { color: var(--dim); display: inline-block; width: 70px; }
+    .reveal .grid10 {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 12px; font-size: 0.55em;
+    }
+    .reveal .grid10 > div {
+      border: 1px solid #333; padding: 16px 8px; border-radius: 6px;
+      background: rgba(255,255,255,0.02);
+    }
+    .reveal .grid10 > div:hover { border-color: var(--accent); }
   </style>
 </head>
 <body>
@@ -1135,6 +1144,148 @@ AI:   "Potential issues I noticed:
 
   <section>
     <h2>Thanks! Go be confused.</h2>
+    <p>
+      <strong>Rotem Bar</strong><br>
+      <span class="dim small">
+        @rotembar · linkedin.com/in/rotembar<br>
+        Slides + labs: github.com/infosec-cyber/hackthebay-3-workshop
+      </span>
+    </p>
+    <p class="tiny dim" style="margin-top:60px;">
+      Questions? After, during workshop, or at the bar. Bar preferred.<br>
+      <span class="accent">↓ Appendix: 10 playgrounds if you'd rather self-study</span>
+    </p>
+  </section>
+</section>
+
+<!-- ============================================================ -->
+<!-- APPENDIX — 10 PLAYGROUNDS (fallback if no workshop)          -->
+<!-- ============================================================ -->
+<section data-background-color="#1a1a2e">
+  <section>
+    <h2>Appendix: <span class="accent">10 Playgrounds</span></h2>
+    <div class="grid10">
+      <div><strong class="accent">01</strong><br>Web Apps</div>
+      <div><strong class="accent">02</strong><br>APIs</div>
+      <div><strong class="accent">03</strong><br>Auth & Sessions</div>
+      <div><strong class="accent">04</strong><br>Browser / Client-Side</div>
+      <div><strong class="accent">05</strong><br>Mobile</div>
+      <div><strong class="accent">06</strong><br>Cloud</div>
+      <div><strong class="accent">07</strong><br>CI/CD & Supply Chain</div>
+      <div><strong class="accent">08</strong><br>IoT / Firmware</div>
+      <div><strong class="accent">09</strong><br>Source Code</div>
+      <div><strong class="accent">10</strong><br>Recon</div>
+    </div>
+    <p class="dim tiny" style="margin-top:30px;">
+      Same three questions work in every one of these. The targets just look different.<br>
+      Pick whichever one your day job is closest to — you already have context there.
+    </p>
+  </section>
+
+  <section>
+    <h3><span class="accent">01</span> Web Apps</h3>
+    <table class="small">
+      <tr><td><strong>Practice</strong></td><td>PortSwigger Web Security Academy — do all of Access Control first</td></tr>
+      <tr><td><strong>Tool</strong></td><td>Burp Community / Caido — <em>after</em> you understand the app</td></tr>
+      <tr><td><strong>Extension</strong></td><td>Autorize (Burp) — automates "can user A do user B's thing?"</td></tr>
+      <tr><td><strong>Habit</strong></td><td>Append <code>.json</code>, <code>.xml</code>, <code>/</code>, <code>%20</code> to every path</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3><span class="accent">02</span> APIs</h3>
+    <table class="small">
+      <tr><td><strong>Read</strong></td><td>OWASP API Security Top 10 — different list than web!</td></tr>
+      <tr><td><strong>Practice</strong></td><td>crAPI, vAPI, DVGA (Damn Vulnerable GraphQL App)</td></tr>
+      <tr><td><strong>Tool</strong></td><td><code>clairvoyance</code> — schema recon via error messages</td></tr>
+      <tr><td><strong>Tool</strong></td><td><code>graphql-cop</code> — automated GraphQL misconfig checks</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3><span class="accent">03</span> Auth & Sessions</h3>
+    <table class="small">
+      <tr><td><strong>Tool</strong></td><td><code>jwt_tool</code> — <code>-M at</code> runs all attacks automatically</td></tr>
+      <tr><td><strong>Tool</strong></td><td><code>flask-unsign</code> — crack Flask session secrets with wordlist</td></tr>
+      <tr><td><strong>Read</strong></td><td>OAuth 2.0 Threat Model (RFC 6819) — dense but gold</td></tr>
+      <tr><td><strong>Lab</strong></td><td>PortSwigger: entire JWT + OAuth + Auth sections</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3><span class="accent">04</span> Browser / Client-Side</h3>
+    <table class="small">
+      <tr><td><strong>Tool</strong></td><td>DOM Invader (Burp browser) — auto-finds sinks</td></tr>
+      <tr><td><strong>Tool</strong></td><td>PP-finder, protoscan for prototype pollution</td></tr>
+      <tr><td><strong>Read</strong></td><td>PortSwigger prototype pollution research series</td></tr>
+      <tr><td><strong>Hunt</strong></td><td>Browser extensions: unpack → <code>manifest.json</code> → <code>externally_connectable</code></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3><span class="accent">05</span> Mobile</h3>
+    <table class="small">
+      <tr><td><strong>Static</strong></td><td>jadx, apktool, MobSF (all-in-one scanner)</td></tr>
+      <tr><td><strong>Dynamic</strong></td><td>Frida + objection (bypass pinning in 1 command)</td></tr>
+      <tr><td><strong>Read</strong></td><td>OWASP MASTG — the mobile testing bible</td></tr>
+      <tr><td><strong>Practice</strong></td><td>InsecureBankv2, UnCrackable series, DIVA</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3><span class="accent">06</span> Cloud</h3>
+    <table class="small">
+      <tr><td><strong>Practice</strong></td><td>flaws.cloud, flaws2.cloud, CloudGoat, pwnedlabs.io</td></tr>
+      <tr><td><strong>Tool</strong></td><td>Pacu (AWS exploitation), enumerate-iam, cloudfox</td></tr>
+      <tr><td><strong>Read</strong></td><td>hackingthe.cloud — the wiki for all of this</td></tr>
+      <tr><td><strong>Build</strong></td><td>Your own AWS free tier → misconfigure it → attack yourself</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3><span class="accent">07</span> CI/CD & Supply Chain</h3>
+    <table class="small">
+      <tr><td><strong>Practice</strong></td><td>CI/CD Goat — 11 challenges, Jenkins + Gitea, our team built it</td></tr>
+      <tr><td><strong>Read</strong></td><td>OWASP CI/CD Top 10 · "Top 10 CI/CD Security Risks" (Cider)</td></tr>
+      <tr><td><strong>Tool</strong></td><td><code>zizmor</code> — static analysis for GitHub Actions</td></tr>
+      <tr><td><strong>Hunt</strong></td><td>GitHub code search: <code>pull_request_target path:.github</code></td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3><span class="accent">08</span> IoT / Firmware</h3>
+    <table class="small">
+      <tr><td><strong>Extract</strong></td><td>binwalk, unblob, firmware-mod-kit</td></tr>
+      <tr><td><strong>Analyze</strong></td><td>Ghidra (free!), firmwalker, EMBA</td></tr>
+      <tr><td><strong>Emulate</strong></td><td>QEMU + firmadyne — run firmware without hardware</td></tr>
+      <tr><td><strong>Practice</strong></td><td>IoTGoat, DVRF, any $20 router from eBay</td></tr>
+      <tr><td><strong>Read</strong></td><td>OWASP FSTM (Firmware Security Testing Methodology)</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3><span class="accent">09</span> Source Code</h3>
+    <table class="small">
+      <tr><td><strong>Tool</strong></td><td>Semgrep — grep that understands code structure. Free rules at semgrep.dev/r</td></tr>
+      <tr><td><strong>Tool</strong></td><td>CodeQL — query bug classes across codebases. Steep curve, huge payoff</td></tr>
+      <tr><td><strong>Tool</strong></td><td>weggli — like grep but for C/C++ ASTs (Google)</td></tr>
+      <tr><td><strong>Read</strong></td><td>"The Art of Software Security Assessment" (Dowd/McDonald/Schuh) — old, still the best</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h3><span class="accent">10</span> Recon</h3>
+    <table class="small">
+      <tr><td><strong>Discover</strong></td><td>subfinder, amass, assetfinder, github-subdomains</td></tr>
+      <tr><td><strong>Probe</strong></td><td>httpx, nuclei, gowitness, aquatone</td></tr>
+      <tr><td><strong>History</strong></td><td>waybackurls, gau, hakrawler</td></tr>
+      <tr><td><strong>OSINT</strong></td><td>Shodan, Censys, crt.sh, SecurityTrails, Crunchbase</td></tr>
+      <tr><td><strong>Method</strong></td><td>Jason Haddix "Bug Hunter's Methodology v4" — watch the talk</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Now actually go.</h2>
     <p>
       <strong>Rotem Bar</strong><br>
       <span class="dim small">
