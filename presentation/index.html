@@ -997,8 +997,86 @@ AI:   "Potential issues I noticed:
   </section>
 
   <section>
+    <h3>The real problem: <span class="accent2">triage</span></h3>
+    <div class="box warn small">
+      Agent runs overnight. Morning: <strong>47 findings.</strong><br><br>
+      <span class="dim">"I confirmed SQLi on /api/search" — did you? Or did you see a 500 and guess?</span><br>
+      <span class="dim">"IDOR on /users/{id}" — which request? Which response? Show me.</span><br>
+      <span class="dim">"Auth bypass via header injection" — I can't reproduce this.</span>
+    </div>
+    <p class="fragment small" style="margin-top:30px;">
+      An unverifiable finding is <span class="accent2">worse than no finding.</span><br>
+      <span class="dim tiny">You burn a day chasing a hallucination. The real bug on line 12 rots.</span>
+    </p>
+    <aside class="notes">
+      This is the thing nobody talks about. The agent is PROLIFIC. It will
+      generate findings faster than you can read them. Half are real. A
+      quarter are duplicates. A quarter are confidently-stated nonsense. If
+      you can't tell which is which in under 60 seconds per finding, the
+      whole loop collapses.
+    </aside>
+  </section>
+
+  <section>
+    <h3>Fix: route the agent through <span class="accent">your</span> proxy</h3>
+    <svg viewBox="0 0 900 340" style="width:95%; height:auto;">
+      <defs>
+        <marker id="proxy-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#00ff9f"/>
+        </marker>
+        <marker id="proxy-arrow-dim" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#6b7280"/>
+        </marker>
+      </defs>
+
+      <!-- agent -->
+      <rect x="40" y="120" width="150" height="70" rx="6" fill="rgba(0,255,159,0.08)" stroke="#00ff9f" stroke-width="2"/>
+      <text x="115" y="150" fill="#00ff9f" font-family="JetBrains Mono, monospace" font-size="18" font-weight="bold" text-anchor="middle">agent</text>
+      <text x="115" y="172" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="12" text-anchor="middle">HTTP_PROXY=...</text>
+
+      <!-- arrow to caido -->
+      <line x1="190" y1="155" x2="340" y2="155" stroke="#00ff9f" stroke-width="2" marker-end="url(#proxy-arrow)"/>
+      <text x="265" y="145" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle">every request</text>
+
+      <!-- caido -->
+      <rect x="350" y="100" width="200" height="110" rx="6" fill="rgba(255,0,102,0.08)" stroke="#ff0066" stroke-width="2"/>
+      <text x="450" y="135" fill="#ff0066" font-family="JetBrains Mono, monospace" font-size="20" font-weight="bold" text-anchor="middle">Caido</text>
+      <text x="450" y="158" fill="#e5e5e5" font-family="JetBrains Mono, monospace" font-size="12" text-anchor="middle">server mode</text>
+      <text x="450" y="178" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle">records · replays · diffs</text>
+      <text x="450" y="196" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle">full req/resp history</text>
+
+      <!-- arrow to target -->
+      <line x1="550" y1="155" x2="700" y2="155" stroke="#6b7280" stroke-width="2" marker-end="url(#proxy-arrow-dim)"/>
+
+      <!-- target -->
+      <rect x="710" y="120" width="150" height="70" rx="6" fill="rgba(255,255,255,0.03)" stroke="#333" stroke-width="2"/>
+      <text x="785" y="162" fill="#e5e5e5" font-family="JetBrains Mono, monospace" font-size="18" text-anchor="middle">target</text>
+
+      <!-- you, tapping into caido -->
+      <line x1="450" y1="210" x2="450" y2="265" stroke="#ff0066" stroke-width="2" stroke-dasharray="5 3"/>
+      <rect x="360" y="270" width="180" height="50" rx="6" fill="rgba(255,255,255,0.03)" stroke="#ff0066" stroke-width="2"/>
+      <text x="450" y="293" fill="#ff0066" font-family="JetBrains Mono, monospace" font-size="16" font-weight="bold" text-anchor="middle">you</text>
+      <text x="450" y="311" fill="#6b7280" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle">open UI · find req · replay</text>
+    </svg>
+    <div class="box small fragment" style="margin-top:15px;">
+      Agent says <em>"I found X in request #4127"</em> →
+      you open Caido → filter to #4127 → <span class="accent">see the exact bytes</span> →
+      right-click → <span class="accent">Replay</span> → confirm in 30 seconds.
+      <br><span class="dim tiny">No hallucination survives a replay button.</span>
+    </div>
+    <aside class="notes">
+      Caido runs headless as a server — no desktop needed on the agent box.
+      Just set HTTP_PROXY on the agent's HTTP client. Now every finding comes
+      with a receipt. The agent can even reference request IDs in its output.
+      Triage goes from "reproduce from scratch" to "click replay." That's the
+      difference between 47 findings being a gift and a nightmare.
+    </aside>
+  </section>
+
+  <section>
     <h3>Where you fit</h3>
     <p class="small">
+      Someone still <span class="accent">triages</span> the 47 findings. Hits replay. Says "nope."<br>
       Someone still decides <span class="accent">what "impact" means</span> for this business.<br>
       Someone still reads step 5 and says <span class="accent">"no — chain it with the SSO thing."</span><br>
       Someone still builds the harness in step 1.
